@@ -360,14 +360,6 @@
 <body>
   <canvas id="confettiCanvas"></canvas>
 
-  <!-- Hidden YouTube player -->
-  <iframe id="ytPlayer"
-    src="https://www.youtube.com/embed/K3JGxj2rvAs?enablejsapi=1&autoplay=0&loop=1&playlist=K3JGxj2rvAs"
-    allow="autoplay"
-    style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1"
-    frameborder="0">
-  </iframe>
-
   <!-- Music toggle button -->
   <button class="music-btn" id="musicBtn" title="Müziği aç/kapat">🎵</button>
 
@@ -580,24 +572,27 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
 
     /* ── 2. LANDING ── */
     /* ── MUSIC ── */
-    const ytPlayer  = document.getElementById("ytPlayer");
-    const musicBtn  = document.getElementById("musicBtn");
-    let musicOn = true;
+    const musicBtn = document.getElementById("musicBtn");
+    let audio = null;
+    let musicOn = false;
 
     function startMusic() {
-      ytPlayer.src = ytPlayer.src.replace("autoplay=0", "autoplay=1");
+      if (!audio) {
+        audio = new Audio("https://cdn.pixabay.com/audio/2024/11/08/audio_a5a7202b3e.mp3");
+        audio.loop = true;
+        audio.volume = 0.5;
+      }
+      audio.play().catch(() => {});
+      musicOn = true;
       musicBtn.style.display = "flex";
+      musicBtn.textContent = "🎵";
     }
 
     musicBtn.addEventListener("click", () => {
+      if (!audio) return;
       musicOn = !musicOn;
-      if (musicOn) {
-        ytPlayer.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        musicBtn.textContent = "🎵";
-      } else {
-        ytPlayer.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-        musicBtn.textContent = "🔇";
-      }
+      if (musicOn) { audio.play(); musicBtn.textContent = "🎵"; }
+      else          { audio.pause(); musicBtn.textContent = "🔇"; }
     });
 
     document.getElementById("startBtn").addEventListener("click", () => { startMusic(); show("valentineScreen"); });
