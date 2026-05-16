@@ -785,31 +785,33 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
 
       <div class="photo-section-label">our memories ✦</div>
       <div class="photo-gallery" id="photoGallery">
-        <div class="polaroid" style="--rot:-4deg;--delay:0.2s">
-          <img src="photos/p1.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="polaroid-placeholder" style="display:none">📷</div>
+        <div class="polaroid" style="--rot:-4deg;--delay:0.2s" onclick="openLightbox('pb.jpeg','🇮🇹 Roma')">
+          <img src="pb.jpeg" alt="">
           <div class="polaroid-caption">🇮🇹 Roma</div>
         </div>
-        <div class="polaroid" style="--rot:3deg;--delay:0.45s">
-          <img src="photos/p2.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="polaroid-placeholder" style="display:none">💋</div>
+        <div class="polaroid" style="--rot:3deg;--delay:0.45s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.57 PM.jpeg','metro anı 🚇')">
+          <img src="WhatsApp Image 2026-05-16 at 1.59.57 PM.jpeg" alt="">
           <div class="polaroid-caption">metro anı 🚇</div>
         </div>
-        <div class="polaroid" style="--rot:-2deg;--delay:0.7s">
-          <img src="photos/p3.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="polaroid-placeholder" style="display:none">🌙</div>
+        <div class="polaroid" style="--rot:-2deg;--delay:0.7s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.58 PM.jpeg','gece ✨')">
+          <img src="WhatsApp Image 2026-05-16 at 1.59.58 PM.jpeg" alt="">
           <div class="polaroid-caption">gece ✨</div>
         </div>
-        <div class="polaroid" style="--rot:5deg;--delay:0.95s">
-          <img src="photos/p4.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="polaroid-placeholder" style="display:none">🌸</div>
-          <div class="polaroid-caption">Pavia 💛</div>
+        <div class="polaroid" style="--rot:5deg;--delay:0.95s" onclick="openLightbox('polen.jpeg','Polen 🌸')">
+          <img src="polen.jpeg" alt="">
+          <div class="polaroid-caption">Polen 🌸</div>
         </div>
-        <div class="polaroid" style="--rot:-3deg;--delay:1.2s">
-          <img src="photos/p5.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="polaroid-placeholder" style="display:none">🏛️</div>
+        <div class="polaroid" style="--rot:-3deg;--delay:1.2s" onclick="openLightbox('bp.jpeg','Milano 🇮🇹')">
+          <img src="bp.jpeg" alt="">
           <div class="polaroid-caption">Milano 🇮🇹</div>
         </div>
+      </div>
+
+      <!-- Lightbox -->
+      <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:pointer;">
+        <img id="lightboxImg" src="" alt="" style="max-width:92vw;max-height:80vh;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,0.6);object-fit:contain;">
+        <div id="lightboxCaption" style="color:rgba(255,255,255,0.8);font-size:14px;font-family:'Courier New',monospace;letter-spacing:1px;"></div>
+        <div style="color:rgba(255,255,255,0.4);font-size:12px;">kapat için tıkla</div>
       </div>
     </div>
   </div>
@@ -1497,6 +1499,17 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       show("finalScreen");
       startFinalCelebration();
     });
+
+    function openLightbox(src, caption) {
+      var lb = document.getElementById("lightbox");
+      document.getElementById("lightboxImg").src = src;
+      document.getElementById("lightboxCaption").textContent = caption;
+      lb.style.display = "flex";
+    }
+    function closeLightbox() {
+      document.getElementById("lightbox").style.display = "none";
+    }
+    document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeLightbox(); });
   </script>
 </body>
 </html>
