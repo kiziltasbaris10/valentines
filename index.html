@@ -420,6 +420,44 @@
       box-shadow: 0 4px 12px rgba(255,59,122,.3);
     }
     .game-btn:active { opacity: .75; transform: scale(.96); }
+
+    /* ── STORY ── */
+    #gameStoryScreen.active {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100svh; padding: 0;
+    }
+    .story-wrap {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at 50% 40%, #1a0a30 0%, #050510 100%);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10; overflow: hidden;
+    }
+    #starCanvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .story-inner { text-align: center; padding: 40px 28px; max-width: 500px; position: relative; z-index: 2; }
+    .story-hearts { font-size: 28px; margin-bottom: 24px; opacity: 0; transition: opacity 1s; letter-spacing: 8px; }
+    .story-hearts.vis { opacity: 1; }
+    .story-line {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: clamp(14px, 3vw, 19px); line-height: 2;
+      color: rgba(255,255,255,0); transition: color 1.1s ease;
+      min-height: 1.6em;
+    }
+    .story-line.vis  { color: rgba(255,255,255,0.88); }
+    .story-line.gold { color: rgba(255,210,100,0); }
+    .story-line.gold.vis { color: rgba(255,210,100,0.95); font-weight: bold; }
+    .story-line.pink-c { color: rgba(255,180,210,0); }
+    .story-line.pink-c.vis { color: rgba(255,180,210,0.95); }
+    .story-start-btn {
+      display: none; margin-top: 36px;
+      padding: 16px 52px;
+      background: linear-gradient(135deg, #ff3b7a, #ff9a3c);
+      color: #fff; border: none; border-radius: 999px;
+      font-size: 19px; font-weight: 900; letter-spacing: 1.5px;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(255,59,122,.6);
+      animation: pulse 1.6s ease infinite;
+    }
+    .story-start-btn:hover { transform: scale(1.05); }
     #gameCanvas { border-radius: 12px; display: block; margin: 0 auto; max-width: 100%; }
   </style>
 </head>
@@ -571,7 +609,19 @@
     </div>
   </div>
 
-  <!-- ════ 6. GAME ════ -->
+  <!-- ════ 6. STORY ════ -->
+  <div class="screen" id="gameStoryScreen">
+    <div class="story-wrap">
+      <canvas id="starCanvas"></canvas>
+      <div class="story-inner">
+        <div class="story-hearts" id="storyHearts">💫 &nbsp; 💕 &nbsp; 💫</div>
+        <div id="storyLines"></div>
+        <button class="story-start-btn" id="startGameBtn">▶ START GAME</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 7. GAME ════ -->
   <div class="screen" id="gameScreen">
     <div class="card" style="padding:14px;">
       <div style="text-align:center; margin-bottom:8px;">
@@ -883,9 +933,140 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       document.getElementById("bidikPopup").classList.remove("show");
       document.getElementById("memNext").style.display = "inline-block";
     });
-    document.getElementById("memNext").addEventListener("click", function() { show("gameScreen"); initGame(); });
+    document.getElementById("memNext").addEventListener("click", function() { show("gameStoryScreen"); initStory(); });
+    document.getElementById("startGameBtn").addEventListener("click", function() { show("gameScreen"); initGame(); });
 
-    /* ── 6. GAME ── */
+    /* ── 6. STORY ── */
+    function initStory() {
+      var sc = document.getElementById("starCanvas");
+      sc.width = window.innerWidth; sc.height = window.innerHeight;
+      var sctx = sc.getContext("2d");
+      sctx.clearRect(0, 0, sc.width, sc.height);
+      for (var s = 0; s < 140; s++) {
+        var sx2 = Math.random()*sc.width, sy2 = Math.random()*sc.height;
+        var sr = Math.random()*1.4+0.3;
+        sctx.beginPath(); sctx.arc(sx2,sy2,sr,0,Math.PI*2);
+        sctx.fillStyle = "rgba(255,255,255,"+(Math.random()*0.7+0.2)+")"; sctx.fill();
+      }
+      var lines = [
+        { t:"Once upon a time...",                                  c:"gold"   },
+        { t:"two hearts met from different sides of the world.",    c:""       },
+        { t:"",                                                     c:""       },
+        { t:"8200 kilometers stood between them.",                  c:""       },
+        { t:"But distance was never stronger than love.",           c:"pink-c" },
+        { t:"",                                                     c:""       },
+        { t:"So the prince began his journey...",                   c:""       },
+        { t:"through storms, distance, and time...",                c:""       },
+        { t:"to reach the girl he loved.",                          c:"gold"   },
+      ];
+      var cont = document.getElementById("storyLines");
+      var btn  = document.getElementById("startGameBtn");
+      var hrt  = document.getElementById("storyHearts");
+      cont.innerHTML = ""; btn.style.display = "none"; hrt.classList.remove("vis");
+      setTimeout(function(){ hrt.classList.add("vis"); }, 300);
+      var els = [];
+      for (var i = 0; i < lines.length; i++) {
+        var d = document.createElement("div");
+        d.className = "story-line " + lines[i].c;
+        d.textContent = lines[i].t || " ";
+        cont.appendChild(d); els.push(d);
+      }
+      var idx = 0;
+      function next() {
+        if (idx >= els.length) { setTimeout(function(){ btn.style.display = "inline-block"; }, 700); return; }
+        els[idx].classList.add("vis");
+        var delay = lines[idx].t ? 1700 : 500;
+        idx++; setTimeout(next, delay);
+      }
+      setTimeout(next, 800);
+    }
+
+    /* ── 7. GAME ── */
+    function drawBaris(ctx, x, y, flip) {
+      ctx.save();
+      if (flip) { ctx.translate(x + 30, 0); ctx.scale(-1, 1); x = 0; }
+      var cx = x + 15;
+      // Body – green hoodie
+      ctx.fillStyle = "#2a6b45";
+      ctx.beginPath(); ctx.roundRect(x+4, y+22, 22, 14, 4); ctx.fill();
+      // Neck
+      ctx.fillStyle = "#c8845a";
+      ctx.fillRect(x+11, y+19, 8, 5);
+      // Head
+      ctx.fillStyle = "#c8845a";
+      ctx.beginPath(); ctx.arc(cx, y+12, 11, 0, Math.PI*2); ctx.fill();
+      // Buzz cut – very short dark
+      ctx.fillStyle = "#111";
+      ctx.beginPath(); ctx.arc(cx, y+12, 11, Math.PI, Math.PI*2); ctx.fill();
+      ctx.fillRect(x+4, y+5, 22, 7);
+      // Ears
+      ctx.fillStyle = "#c8845a";
+      ctx.beginPath(); ctx.arc(x+4, y+13, 3, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+26, y+13, 3, 0, Math.PI*2); ctx.fill();
+      // Eyes
+      ctx.fillStyle = "#1a0a05";
+      ctx.beginPath(); ctx.arc(cx-4, y+13, 2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+4, y+13, 2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "white";
+      ctx.beginPath(); ctx.arc(cx-3, y+12, 0.7, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+5, y+12, 0.7, 0, Math.PI*2); ctx.fill();
+      // Thick brows
+      ctx.strokeStyle = "#111"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(cx-7,y+9); ctx.lineTo(cx-1,y+9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx+1,y+9); ctx.lineTo(cx+7,y+9); ctx.stroke();
+      // Beard stubble
+      ctx.fillStyle = "#222"; ctx.globalAlpha = 0.32;
+      ctx.beginPath(); ctx.ellipse(cx, y+20, 7, 3.5, 0, 0, Math.PI); ctx.fill();
+      ctx.globalAlpha = 1;
+      // Mouth
+      ctx.strokeStyle = "#8b3a1a"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx-3,y+18); ctx.lineTo(cx+3,y+18); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPolen(ctx, x, y) {
+      var cx = x + 18;
+      // Body – dark puffer jacket
+      ctx.fillStyle = "#1c1c1c";
+      ctx.beginPath(); ctx.roundRect(x+3, y+24, 26, 14, 4); ctx.fill();
+      ctx.fillStyle = "#2e2e2e";
+      ctx.fillRect(x+5, y+26, 7, 10);
+      // Neck
+      ctx.fillStyle = "#f0c0a0";
+      ctx.fillRect(x+12, y+20, 8, 6);
+      // Head
+      ctx.fillStyle = "#f0c0a0";
+      ctx.beginPath(); ctx.arc(cx, y+12, 11, 0, Math.PI*2); ctx.fill();
+      // Dark curly hair
+      ctx.fillStyle = "#0f0500";
+      ctx.beginPath(); ctx.arc(cx, y+8, 12, Math.PI, Math.PI*1.96); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx-2, y+5, 9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+3, y+16, 5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+33, y+16, 5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+8, y+4, 5, 0, Math.PI*2); ctx.fill();
+      // Eyes – warm and big
+      ctx.fillStyle = "#3d1800";
+      ctx.beginPath(); ctx.ellipse(cx-4, y+12, 2.5, 2.2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx+4, y+12, 2.5, 2.2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "white";
+      ctx.beginPath(); ctx.arc(cx-3, y+11, 0.9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+5, y+11, 0.9, 0, Math.PI*2); ctx.fill();
+      // Soft brows
+      ctx.strokeStyle = "#2a0800"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(cx-7,y+8); ctx.lineTo(cx-1,y+9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx+1,y+9); ctx.lineTo(cx+7,y+8); ctx.stroke();
+      // Big smile (signature Polen gülüşü)
+      ctx.strokeStyle = "#c04040"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, y+17, 5.5, 0.15, Math.PI-0.15); ctx.stroke();
+      ctx.fillStyle = "white";
+      ctx.beginPath(); ctx.arc(cx, y+18, 4, 0.15, Math.PI-0.15); ctx.fill();
+      // Rosy cheeks
+      ctx.fillStyle = "#ffb3b3"; ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.arc(cx-7, y+15, 4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+7, y+15, 4, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
     var gameRAF = null;
     function initGame() {
       if (gameRAF) { cancelAnimationFrame(gameRAF); gameRAF = null; }
@@ -1022,14 +1203,12 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
           ctx.fillStyle="#555"; ctx.fillRect(prSx+28,prY-52,3,58);
           ctx.fillStyle="#ff3b7a";
           ctx.beginPath(); ctx.moveTo(prSx+31,prY-52); ctx.lineTo(prSx+56,prY-39); ctx.lineTo(prSx+31,prY-26); ctx.fill();
-          ctx.font="30px serif"; ctx.fillText("👸",prSx,prY+32);
+          drawPolen(ctx, prSx-2, prY-2);
         }
 
         var psx=p.x-camX;
-        ctx.font="28px serif";
-        if (p.vx<0) {
-          ctx.save(); ctx.translate(psx+p.w,p.y+p.h); ctx.scale(-1,1); ctx.fillText("🤴",0,0); ctx.restore();
-        } else { ctx.fillText("🤴",psx,p.y+p.h); }
+        var facingLeft = p.vx < 0;
+        drawBaris(ctx, psx, p.y, facingLeft);
 
         if (gameWon) {
           ctx.fillStyle="rgba(255,255,255,0.82)"; ctx.fillRect(0,0,W,H);
