@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Barış & Polen 💕</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://w.soundcloud.com/player/api.js"></script>
   <style>
     .music-btn {
       position: fixed;
@@ -571,28 +572,31 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     setTimeout(animLoad, 500);
 
     /* ── 2. LANDING ── */
-    /* ── MUSIC ── */
+    /* ── MUSIC (SoundCloud widget) ── */
     const musicBtn = document.getElementById("musicBtn");
-    let audio = null;
+    let scWidget = null;
     let musicOn = false;
 
     function startMusic() {
-      if (!audio) {
-        audio = new Audio("https://cdn.pixabay.com/audio/2024/11/08/audio_a5a7202b3e.mp3");
-        audio.loop = true;
-        audio.volume = 0.5;
+      if (!scWidget) {
+        const iframe = document.createElement("iframe");
+        iframe.id = "scFrame";
+        iframe.src = "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/lykkeli/i-follow-rivers&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false";
+        iframe.allow = "autoplay";
+        iframe.style.cssText = "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;border:none;";
+        document.body.appendChild(iframe);
+        scWidget = SC.Widget(iframe);
       }
-      audio.play().catch(() => {});
       musicOn = true;
       musicBtn.style.display = "flex";
       musicBtn.textContent = "🎵";
     }
 
     musicBtn.addEventListener("click", () => {
-      if (!audio) return;
+      if (!scWidget) return;
       musicOn = !musicOn;
-      if (musicOn) { audio.play(); musicBtn.textContent = "🎵"; }
-      else          { audio.pause(); musicBtn.textContent = "🔇"; }
+      if (musicOn) { scWidget.play(); musicBtn.textContent = "🎵"; }
+      else          { scWidget.pause(); musicBtn.textContent = "🔇"; }
     });
 
     document.getElementById("startBtn").addEventListener("click", () => { startMusic(); show("valentineScreen"); });
