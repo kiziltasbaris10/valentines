@@ -494,33 +494,38 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
 
   <script>
     /* ── CONFETTI ── */
-    const cnv = document.getElementById("confettiCanvas");
+    var cnv = document.getElementById("confettiCanvas");
     function resizeCnv() {
-      const d = Math.max(1, window.devicePixelRatio || 1);
-      cnv.width  = Math.floor(window.innerWidth  * d);
-      cnv.height = Math.floor(window.innerHeight * d);
-      cnv.style.width = "100vw"; cnv.style.height = "100vh";
+      try {
+        if (!cnv) return;
+        var d = Math.max(1, window.devicePixelRatio || 1);
+        cnv.width  = Math.floor(window.innerWidth  * d);
+        cnv.height = Math.floor(window.innerHeight * d);
+        cnv.style.width = "100vw"; cnv.style.height = "100vh";
+      } catch(e) {}
     }
     resizeCnv();
     window.addEventListener("resize", resizeCnv);
-    window.addEventListener("orientationchange", () => setTimeout(resizeCnv, 150));
-    let ci = function() {};
+    window.addEventListener("orientationchange", function() { setTimeout(resizeCnv, 150); });
+    var ci = function() {};
     try { ci = confetti.create(cnv, { resize: false, useWorker: true }); } catch(e) {}
-    const burst = () => { try { ci({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: .5, y: .6 } }); } catch(e) {} };
-    const bigBurst = () => {
+    function burst() { try { ci({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: .5, y: .6 } }); } catch(e) {} }
+    function bigBurst() {
       try {
-        const end = Date.now() + 2200;
+        var end = Date.now() + 2200;
         (function f() { ci({ particleCount: 13, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * .3 } }); if (Date.now() < end) requestAnimationFrame(f); })();
-        setTimeout(() => ci({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: .5, y: .55 } }), 400);
+        setTimeout(function() { ci({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: .5, y: .55 } }); }, 400);
       } catch(e) {}
-    };
+    }
 
     /* ── SCREEN NAV ── */
     function show(id) {
-      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-      window.scrollTo(0, 0);
-      resizeCnv();
+      try {
+        document.querySelectorAll(".screen").forEach(function(s) { s.classList.remove("active"); });
+        document.getElementById(id).classList.add("active");
+        window.scrollTo(0, 0);
+        resizeCnv();
+      } catch(e) {}
     }
 
     /* ── 1. LOADING ── */
@@ -579,8 +584,8 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     yesBtn.addEventListener("click", function() {
       burst();
       curQ = 0;
+      loadQ(0);
       show("quizScreen");
-      setTimeout(function() { loadQ(0); }, 80);
     });
 
     /* ── 4. QUIZ ── */
