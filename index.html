@@ -408,6 +408,19 @@
       cursor: pointer; box-shadow: 0 8px 20px rgba(255,59,122,.3);
     }
     .popup-btn:hover { background: var(--pink-hover); }
+
+    /* ── GAME ── */
+    .game-btn {
+      background: var(--pink); color: #fff;
+      border: none; border-radius: 12px;
+      padding: 13px 22px; font-size: 18px; font-weight: 800;
+      cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(255,59,122,.3);
+    }
+    .game-btn:active { opacity: .75; transform: scale(.96); }
+    #gameCanvas { border-radius: 12px; display: block; margin: 0 auto; max-width: 100%; }
   </style>
 </head>
 
@@ -558,7 +571,25 @@
     </div>
   </div>
 
-  <!-- ════ 6. LETTER ════ -->
+  <!-- ════ 6. GAME ════ -->
+  <div class="screen" id="gameScreen">
+    <div class="card" style="padding:14px;">
+      <div style="text-align:center; margin-bottom:8px;">
+        <div style="font-size:18px; font-weight:800; color:var(--pink);">🤴 Prense Ulaş!</div>
+        <div style="font-size:12px; color:#aaa; margin-top:3px;">← → Hareket &nbsp;|&nbsp; Boşluk / ↑ Zıpla</div>
+      </div>
+      <canvas id="gameCanvas"></canvas>
+      <div style="display:flex; justify-content:space-between; margin-top:10px; gap:8px;">
+        <div style="display:flex; gap:6px;">
+          <button id="btnLeft"  class="game-btn">◀</button>
+          <button id="btnRight" class="game-btn">▶</button>
+        </div>
+        <button id="btnJump" class="game-btn" style="flex:1; max-width:150px;">↑ ZIPLA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 7. LETTER ════ -->
   <div class="screen" id="letterScreen">
     <div class="card">
       <div class="letter-title">💌 Sana Bir Mektup Var</div>
@@ -852,9 +883,171 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       document.getElementById("bidikPopup").classList.remove("show");
       document.getElementById("memNext").style.display = "inline-block";
     });
-    document.getElementById("memNext").addEventListener("click", function() { show("letterScreen"); });
+    document.getElementById("memNext").addEventListener("click", function() { show("gameScreen"); initGame(); });
 
-    /* ── 6. LETTER ── */
+    /* ── 6. GAME ── */
+    var gameRAF = null;
+    function initGame() {
+      if (gameRAF) { cancelAnimationFrame(gameRAF); gameRAF = null; }
+      var canvas = document.getElementById("gameCanvas");
+      var ctx = canvas.getContext("2d");
+      var W = Math.min(620, (document.querySelector("#gameScreen .card").clientWidth || 620) - 28);
+      var H = 240;
+      canvas.width = W; canvas.height = H;
+
+      var GRAV = 0.52, JUMP = -10.5, SPEED = 3.4;
+      var GND = H - 44, WORLD_W = 2900;
+
+      var p = { x: 60, y: GND - 36, w: 30, h: 36, vx: 0, vy: 0, onGround: false };
+      var camX = 0, gameWon = false, gameDead = false, deadTick = 0;
+      var keys = {}, mL = false, mR = false;
+
+      var grounds = [
+        {x:0,w:370},{x:450,w:310},{x:860,w:370},{x:1330,w:350},
+        {x:1780,w:390},{x:2270,w:630}
+      ];
+      var floats = [
+        {x:170,y:GND-85,w:80},{x:340,y:GND-70,w:90},{x:420,y:GND-90,w:80},
+        {x:590,y:GND-75,w:90},{x:730,y:GND-70,w:85},{x:820,y:GND-90,w:80},
+        {x:990,y:GND-95,w:80},{x:1090,y:GND-70,w:90},{x:1200,y:GND-70,w:85},
+        {x:1290,y:GND-90,w:80},{x:1440,y:GND-75,w:85},{x:1570,y:GND-95,w:80},
+        {x:1670,y:GND-70,w:90},{x:1750,y:GND-90,w:80},{x:1910,y:GND-75,w:90},
+        {x:2040,y:GND-95,w:80},{x:2150,y:GND-70,w:90},{x:2240,y:GND-90,w:80},
+        {x:2400,y:GND-75,w:85},{x:2540,y:GND-95,w:80}
+      ];
+      var pits = [{x:370,w:80},{x:760,w:100},{x:1230,w:100},{x:1680,w:100},{x:2170,w:100}];
+      var clouds = [{x:80,y:25,r:22},{x:220,y:18,r:18},{x:500,y:28,r:20},{x:800,y:20,r:18},
+                    {x:1100,y:26,r:22},{x:1400,y:18,r:18},{x:1700,y:24,r:20},{x:2000,y:18,r:18},
+                    {x:2300,y:26,r:22},{x:2600,y:20,r:18}];
+
+      var allPlats = [];
+      for (var i=0;i<grounds.length;i++) allPlats.push({x:grounds[i].x,y:GND,w:grounds[i].w,h:40});
+      for (var i=0;i<floats.length;i++)  allPlats.push({x:floats[i].x, y:floats[i].y,w:floats[i].w,h:11});
+
+      var prX = 2720, prY = GND - 38;
+
+      function doJump() { if (p.onGround && !gameWon) { p.vy = JUMP; p.onGround = false; } }
+      function resetP() { p.x=60; p.y=GND-36; p.vx=0; p.vy=0; p.onGround=false; gameDead=false; camX=0; }
+
+      function onKD(e) {
+        keys[e.key] = true;
+        if ([" ","ArrowUp","w","W"].indexOf(e.key) > -1) { doJump(); e.preventDefault(); }
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") e.preventDefault();
+      }
+      function onKU(e) { keys[e.key] = false; }
+      document.addEventListener("keydown", onKD);
+      document.addEventListener("keyup",   onKU);
+
+      function setupBtn(el, setFn) {
+        el.addEventListener("touchstart", function(e){e.preventDefault();setFn(true);},{passive:false});
+        el.addEventListener("touchend",   function(e){e.preventDefault();setFn(false);},{passive:false});
+        el.addEventListener("mousedown",  function(){setFn(true);});
+        el.addEventListener("mouseup",    function(){setFn(false);});
+        el.addEventListener("mouseleave", function(){setFn(false);});
+      }
+      setupBtn(document.getElementById("btnLeft"),  function(v){mL=v;});
+      setupBtn(document.getElementById("btnRight"), function(v){mR=v;});
+      document.getElementById("btnJump").addEventListener("touchstart",function(e){e.preventDefault();doJump();},{passive:false});
+      document.getElementById("btnJump").addEventListener("mousedown", function(){doJump();});
+
+      function loop() {
+        if (!document.getElementById("gameScreen").classList.contains("active")) {
+          document.removeEventListener("keydown", onKD);
+          document.removeEventListener("keyup",   onKU);
+          return;
+        }
+        gameRAF = requestAnimationFrame(loop);
+
+        if (!gameWon && !gameDead) {
+          var goL = keys["ArrowLeft"] ||keys["a"]||keys["A"]||mL;
+          var goR = keys["ArrowRight"]||keys["d"]||keys["D"]||mR;
+          p.vx = goL ? -SPEED : goR ? SPEED : 0;
+          p.vy += GRAV; p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = 0;
+          if (p.x > WORLD_W - p.w) p.x = WORLD_W - p.w;
+          p.onGround = false;
+          for (var i=0;i<allPlats.length;i++) {
+            var pl=allPlats[i], prevB=p.y+p.h-p.vy;
+            if (p.x+p.w>pl.x && p.x<pl.x+pl.w && p.y+p.h>=pl.y && prevB<=pl.y+4 && p.vy>=0) {
+              p.y=pl.y-p.h; p.vy=0; p.onGround=true;
+            }
+          }
+          if (p.y > H+80) { gameDead=true; deadTick=55; }
+          if (p.x+p.w > prX && p.x < prX+36 && p.y+p.h > prY) {
+            gameWon=true;
+            setTimeout(function(){ burst(); show("letterScreen"); },1600);
+          }
+        } else if (gameDead) { if (--deadTick<=0) resetP(); }
+
+        var tCam = p.x - W*0.35;
+        camX += (tCam-camX)*0.1;
+        camX = Math.max(0, Math.min(camX, WORLD_W-W));
+
+        /* ── draw ── */
+        var sky=ctx.createLinearGradient(0,0,0,H);
+        sky.addColorStop(0,"#ffeef6"); sky.addColorStop(1,"#ffd6e7");
+        ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+        ctx.fillStyle="rgba(255,255,255,0.82)";
+        for (var i=0;i<clouds.length;i++) {
+          var cl=clouds[i], cx2=cl.x-camX*0.35;
+          if (cx2<-60||cx2>W+60) continue;
+          ctx.beginPath(); ctx.arc(cx2,cl.y,cl.r,0,Math.PI*2);
+          ctx.arc(cx2+cl.r*0.9,cl.y-5,cl.r*0.68,0,Math.PI*2);
+          ctx.arc(cx2+cl.r*1.75,cl.y,cl.r*0.8,0,Math.PI*2); ctx.fill();
+        }
+
+        for (var i=0;i<grounds.length;i++) {
+          var g=grounds[i], gx=g.x-camX;
+          if (gx+g.w<0||gx>W) continue;
+          ctx.fillStyle="#7ec850"; ctx.fillRect(gx,GND,g.w,12);
+          ctx.fillStyle="#5a9e35"; ctx.fillRect(gx,GND+12,g.w,32);
+        }
+        for (var i=0;i<floats.length;i++) {
+          var f=floats[i], fx=f.x-camX;
+          if (fx+f.w<0||fx>W) continue;
+          ctx.fillStyle="#c8845a"; ctx.fillRect(fx,f.y,f.w,11);
+          ctx.fillStyle="#7ec850"; ctx.fillRect(fx,f.y,f.w,5);
+        }
+        ctx.fillStyle="rgba(100,190,255,0.55)";
+        for (var i=0;i<pits.length;i++) {
+          var pg=pits[i], pgx=pg.x-camX;
+          if (pgx+pg.w<0||pgx>W) continue;
+          ctx.fillRect(pgx,GND+2,pg.w,42);
+          ctx.font="13px serif"; ctx.fillText("🌊",pgx+pg.w/2-8,GND+30);
+        }
+
+        var prSx=prX-camX;
+        if (prSx>-60&&prSx<W+60) {
+          ctx.fillStyle="#555"; ctx.fillRect(prSx+28,prY-52,3,58);
+          ctx.fillStyle="#ff3b7a";
+          ctx.beginPath(); ctx.moveTo(prSx+31,prY-52); ctx.lineTo(prSx+56,prY-39); ctx.lineTo(prSx+31,prY-26); ctx.fill();
+          ctx.font="30px serif"; ctx.fillText("👸",prSx,prY+32);
+        }
+
+        var psx=p.x-camX;
+        ctx.font="28px serif";
+        if (p.vx<0) {
+          ctx.save(); ctx.translate(psx+p.w,p.y+p.h); ctx.scale(-1,1); ctx.fillText("🤴",0,0); ctx.restore();
+        } else { ctx.fillText("🤴",psx,p.y+p.h); }
+
+        if (gameWon) {
+          ctx.fillStyle="rgba(255,255,255,0.82)"; ctx.fillRect(0,0,W,H);
+          ctx.font="bold 19px system-ui"; ctx.fillStyle="#ff3b7a"; ctx.textAlign="center";
+          ctx.fillText("Prens prensese kavuştu! 💕",W/2,H/2-8);
+          ctx.font="14px system-ui"; ctx.fillStyle="#888";
+          ctx.fillText("Mektup açılıyor...",W/2,H/2+18); ctx.textAlign="left";
+        }
+        if (gameDead) {
+          ctx.fillStyle="rgba(0,0,0,0.38)"; ctx.fillRect(0,0,W,H);
+          ctx.font="bold 17px system-ui"; ctx.fillStyle="#fff"; ctx.textAlign="center";
+          ctx.fillText("Yeniden deniyor... 😅",W/2,H/2); ctx.textAlign="left";
+        }
+      }
+      loop();
+    }
+
+    /* ── 7. LETTER ── */
     const envWrap = document.getElementById("envWrap");
     const letterContent = document.getElementById("letterContent");
     const envHint = document.getElementById("envHint");
