@@ -390,7 +390,7 @@
     }
     .polaroid {
       background: #fff;
-      padding: 7px 7px 26px;
+      padding: 7px;
       box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.08);
       border-radius: 2px;
       transform: rotate(var(--rot, 0deg));
@@ -785,32 +785,26 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
 
       <div class="photo-section-label">our memories ✦</div>
       <div class="photo-gallery" id="photoGallery">
-        <div class="polaroid" style="--rot:-4deg;--delay:0.2s" onclick="openLightbox('pb.jpeg','🇮🇹 Roma')">
+        <div class="polaroid" style="--rot:-4deg;--delay:0.2s" onclick="openLightbox('pb.jpeg')">
           <img src="pb.jpeg" alt="">
-          <div class="polaroid-caption">🇮🇹 Roma</div>
         </div>
-        <div class="polaroid" style="--rot:3deg;--delay:0.45s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.57 PM.jpeg','metro anı 🚇')">
+        <div class="polaroid" style="--rot:3deg;--delay:0.45s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.57 PM.jpeg')">
           <img src="WhatsApp Image 2026-05-16 at 1.59.57 PM.jpeg" alt="">
-          <div class="polaroid-caption">metro anı 🚇</div>
         </div>
-        <div class="polaroid" style="--rot:-2deg;--delay:0.7s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.58 PM.jpeg','gece ✨')">
+        <div class="polaroid" style="--rot:-2deg;--delay:0.7s" onclick="openLightbox('WhatsApp Image 2026-05-16 at 1.59.58 PM.jpeg')">
           <img src="WhatsApp Image 2026-05-16 at 1.59.58 PM.jpeg" alt="">
-          <div class="polaroid-caption">gece ✨</div>
         </div>
-        <div class="polaroid" style="--rot:5deg;--delay:0.95s" onclick="openLightbox('polen.jpeg','Polen 🌸')">
+        <div class="polaroid" style="--rot:5deg;--delay:0.95s" onclick="openLightbox('polen.jpeg')">
           <img src="polen.jpeg" alt="">
-          <div class="polaroid-caption">Polen 🌸</div>
         </div>
-        <div class="polaroid" style="--rot:-3deg;--delay:1.2s" onclick="openLightbox('bp.jpeg','Milano 🇮🇹')">
+        <div class="polaroid" style="--rot:-3deg;--delay:1.2s" onclick="openLightbox('bp.jpeg')">
           <img src="bp.jpeg" alt="">
-          <div class="polaroid-caption">Milano 🇮🇹</div>
         </div>
       </div>
 
       <!-- Lightbox -->
       <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:pointer;">
-        <img id="lightboxImg" src="" alt="" style="max-width:92vw;max-height:80vh;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,0.6);object-fit:contain;">
-        <div id="lightboxCaption" style="color:rgba(255,255,255,0.8);font-size:14px;font-family:'Courier New',monospace;letter-spacing:1px;"></div>
+        <img id="lightboxImg" src="" alt="" style="max-width:92vw;max-height:86vh;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,0.6);object-fit:contain;">
         <div style="color:rgba(255,255,255,0.4);font-size:12px;">kapat için tıkla</div>
       </div>
     </div>
@@ -1455,42 +1449,73 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       setTimeout(() => { letterContent.style.display = "block"; burst(); }, 500);
     });
     var finalConfettiTimer = null;
+    function firework(x, y) {
+      try {
+        ci({ particleCount: 80, angle: 90, spread: 360, startVelocity: 55, decay: 0.92, ticks: 260, origin: { x: x, y: y }, colors: ["#ff3b7a","#ffd700","#ff9a3c","#c084fc","#67e8f9","#fff","#ff6b9d"], shapes: ["circle","square"] });
+      } catch(e) {}
+    }
+    function rocket(x) {
+      try {
+        ci({ particleCount: 120, angle: 90, spread: 50, startVelocity: 72, decay: 0.91, ticks: 300, origin: { x: x, y: 1 }, colors: ["#ff3b7a","#ffd700","#c084fc","#67e8f9","#fff","#ff9a3c"], shapes: ["star","circle"] });
+      } catch(e) {}
+    }
+
     function startFinalCelebration() {
-      bigBurst();
+      var colors = ["#ff3b7a","#ff9a3c","#ffd700","#ff6b9d","#c084fc","#67e8f9","#fff"];
+
+      /* initial mega salvo */
+      try {
+        ci({ particleCount: 350, spread: 160, startVelocity: 65, ticks: 280, origin: { x: .5, y: .5 }, colors: colors });
+      } catch(e) {}
+      setTimeout(function() { firework(.25, .35); }, 300);
+      setTimeout(function() { firework(.75, .3);  }, 500);
+      setTimeout(function() { rocket(.2);          }, 700);
+      setTimeout(function() { rocket(.8);          }, 900);
+      setTimeout(function() { firework(.5,  .25);  }, 1100);
+      setTimeout(function() { rocket(.5);          }, 1300);
+      setTimeout(function() { firework(.15, .4);   }, 1600);
+      setTimeout(function() { firework(.85, .4);   }, 1800);
+      setTimeout(function() { rocket(.35);         }, 2100);
+      setTimeout(function() { rocket(.65);         }, 2300);
+
+      /* floating hearts */
       var heartsWrap = document.getElementById("heartsWrap");
-      var heartEmojis = ["💕","💖","💗","💓","🩷","❤️","💞"];
+      var heartEmojis = ["💕","💖","💗","💓","🩷","❤️","💞","🌹","✨","🎉"];
       function spawnHeart() {
         if (!document.getElementById("finalScreen").classList.contains("active")) return;
         var h = document.createElement("span");
         h.className = "floating-heart";
         h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
         h.style.left = (5 + Math.random() * 90) + "%";
-        h.style.animationDuration = (2 + Math.random() * 2) + "s";
+        h.style.animationDuration = (1.5 + Math.random() * 2) + "s";
         h.style.animationDelay = "0s";
         heartsWrap.appendChild(h);
-        setTimeout(function() { if (h.parentNode) h.parentNode.removeChild(h); }, 4000);
+        setTimeout(function() { if (h.parentNode) h.parentNode.removeChild(h); }, 3500);
       }
       var heartTimer = setInterval(function() {
         if (!document.getElementById("finalScreen").classList.contains("active")) { clearInterval(heartTimer); return; }
-        spawnHeart();
-      }, 400);
+        spawnHeart(); spawnHeart();
+      }, 220);
 
-      var colors = ["#ff3b7a","#ff9a3c","#ffd700","#ff6b9d","#c084fc","#67e8f9"];
+      /* continuous cannon fire */
       var step = 0;
       function launchConfetti() {
         if (!document.getElementById("finalScreen").classList.contains("active")) { clearTimeout(finalConfettiTimer); return; }
         step++;
-        if (step % 3 === 0) {
-          try {
-            ci({ particleCount: 18, angle: 60,  spread: 55, origin: { x: 0,   y: 0.65 }, colors: colors, startVelocity: 50, ticks: 200 });
-            ci({ particleCount: 18, angle: 120, spread: 55, origin: { x: 1,   y: 0.65 }, colors: colors, startVelocity: 50, ticks: 200 });
-          } catch(e) {}
-        } else {
-          try {
-            ci({ particleCount: 12, spread: 80, origin: { x: Math.random(), y: 0.3 }, colors: colors, startVelocity: 40, ticks: 180 });
-          } catch(e) {}
-        }
-        finalConfettiTimer = setTimeout(launchConfetti, 700);
+        var r = step % 6;
+        try {
+          if (r === 0) {
+            ci({ particleCount: 40, angle: 60,  spread: 60, origin: { x: 0,   y: 0.7 }, colors: colors, startVelocity: 60, ticks: 220 });
+            ci({ particleCount: 40, angle: 120, spread: 60, origin: { x: 1,   y: 0.7 }, colors: colors, startVelocity: 60, ticks: 220 });
+          } else if (r === 2) {
+            ci({ particleCount: 50, spread: 120, origin: { x: Math.random(), y: 0.1 }, colors: colors, startVelocity: 50, ticks: 240, shapes: ["star"] });
+          } else if (r === 4) {
+            rocket(Math.random());
+          } else {
+            ci({ particleCount: 25, spread: 90, origin: { x: Math.random(), y: 0.35 }, colors: colors, startVelocity: 45, ticks: 200 });
+          }
+        } catch(e) {}
+        finalConfettiTimer = setTimeout(launchConfetti, 420);
       }
       launchConfetti();
     }
@@ -1500,10 +1525,9 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       startFinalCelebration();
     });
 
-    function openLightbox(src, caption) {
+    function openLightbox(src) {
       var lb = document.getElementById("lightbox");
       document.getElementById("lightboxImg").src = src;
-      document.getElementById("lightboxCaption").textContent = caption;
       lb.style.display = "flex";
     }
     function closeLightbox() {
