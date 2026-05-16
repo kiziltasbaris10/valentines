@@ -267,64 +267,64 @@
     /* ── QUESTIONS ── */
     const questions = [
       {
-        q: "Barış sana ilk mesajı ne zaman attı?",
+        q: "When did Barış first message you?",
         options: ["November 5", "December 31", "October 31", "September 19"],
         answer: 2
       },
       {
-        q: "Barış sana ilk ne zaman çiçek gönderdi?",
+        q: "When did Barış first send you flowers?",
         options: ["December 25", "November 20", "October 30", "January 23"],
         answer: 1
       },
       {
-        q: "Barış'la beraber yediğiniz ilk yemek neydi?",
-        options: ["İskender", "Sushi", "Döner", "Pide"],
+        q: "What was the first meal you and Barış ate together?",
+        options: ["Iskender", "Sushi", "Doner", "Pide"],
         answer: 2
       },
       {
-        q: "İlk nerede tanıştınız?",
-        options: ["Okulda", "Kafede", "Barda", "Sosyal medyada"],
+        q: "Where did we first meet?",
+        options: ["At school", "At a café", "At a bar", "On social media"],
         answer: 0
       },
       {
-        q: "Barış Polen'in en çok hangi özelliğini seviyordur?",
-        options: ["Güzellik", "Hayat vizyonu", "Zeka", "Hepsi"],
+        q: "What does Barış love most about Polen?",
+        options: ["Her beauty", "Her vision in life", "Her intelligence", "All of them"],
         answer: 3
       },
       {
-        q: "Milano'da oynadıkları masa hokeyini Polen kaç kaç yenmiştir?",
-        options: ["Polen 5-1", "Polen 5-2", "Polen 5-3", "Polen 5-4"],
-        answer: 0
-      },
-      {
-        q: "Sevgililer günü yedikleri McDonald's menüsü neydi?",
-        options: ["Big Mac Menü", "Whopper Menü", "Chicken Burger Menü"],
-        answer: 0
-      },
-      {
-        q: "Barış'ın Polen'in hayatında en çok tanışmadığı kişi kimdir?",
-        options: ["Emel Mommy", "Mert Reis", "Pamir", "Fadik Anneanne"],
+        q: "What was the final score of the air hockey game Polen won in Milan?",
+        options: ["Polen won 5–1", "Polen won 5–2", "Polen won 5–3", "Polen won 5–4"],
         answer: 3
       },
       {
-        q: "Barış'ın en sevdiği yemek nedir?",
-        options: ["Taze yeşil fasulye", "Mantı", "Pizza", "Lahmacun"],
+        q: "What McDonald's menu did they eat on Valentine's Day?",
+        options: ["Big Mac Menu", "Whopper Menu", "Chicken Burger Menu"],
         answer: 0
       },
       {
-        q: "Barış Polen'i Malpensa Havalimanı'nda kaç numaralı terminalde beklemiştir?",
-        options: ["5", "7", "9", "1"],
+        q: "Who is the person Barış wishes he had met most in your life?",
+        options: ["Emel Mommy", "Mert Reis", "Pamir", "Grandma Fadik"],
+        answer: 3
+      },
+      {
+        q: "What is Barış's favorite food?",
+        options: ["Fresh green beans", "Manti", "Pizza", "Lahmacun"],
+        answer: 0
+      },
+      {
+        q: "Which terminal did Barış wait for Polen at Malpensa Airport?",
+        options: ["Terminal 5", "Terminal 7", "Terminal 9", "Terminal 1"],
         answer: 1
       }
     ];
 
     const wrongMessages = [
-      "Hmmm, emin misin? 🤔",
-      "Yanlış! Bir daha dene 😏",
-      "Sanmıyorum... 😄",
-      "Olmadı! Tekrar dene 💭",
-      "Hmm, bu doğru değil 😈",
-      "Bir daha düşün! 🙈"
+      "Hmmm, are you sure? 🤔",
+      "Not quite! Try again 😏",
+      "I don't think so... 😄",
+      "Nope! Give it another shot 💭",
+      "Hmm, that's not right 😈",
+      "Think again! 🙈"
     ];
 
     /* ── DOM ── */
@@ -410,7 +410,7 @@
     function loadQuestion(idx) {
       const q = questions[idx];
       progressFill.style.width = (idx / questions.length * 100) + "%";
-      questionCount.textContent = `Soru ${idx + 1} / ${questions.length}`;
+      questionCount.textContent = `Question ${idx + 1} / ${questions.length}`;
       questionText.textContent  = q.q;
       feedback.textContent = "";
       nextBtn.style.display = "none";
@@ -432,7 +432,7 @@
       if (chosen === correct) {
         btns[chosen].classList.add("correct");
         feedback.style.color = "#28a745";
-        feedback.textContent = "Doğru! 🎉";
+        feedback.textContent = "Correct! 🎉";
         burstConfetti();
         nextBtn.style.display = "inline-block";
       } else {
