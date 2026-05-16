@@ -598,6 +598,17 @@
     </div>
   </div>
 
+  <!-- ════ 4.5. FUN TRANSITION ════ -->
+  <div class="screen" id="funScreen">
+    <div class="card" style="text-align:center; padding: 40px 28px;">
+      <div id="funEmoji" style="font-size:64px; animation: bounce 0.8s ease infinite;">🎮</div>
+      <h2 id="funTitle" style="font-size:clamp(24px,5vw,38px); font-weight:900; margin: 16px 0 10px; color: var(--pink);"></h2>
+      <p id="funSub" style="font-size:15px; color:#666; margin-bottom:28px; line-height:1.7;"></p>
+      <div style="font-size:32px; margin-bottom:20px;" id="funIcons"></div>
+      <button class="btn-pink" id="funNext" style="display:none;">Hazırım! →</button>
+    </div>
+  </div>
+
   <!-- ════ 5. MEMORY GAME ════ -->
   <div class="screen" id="memoryScreen">
     <div class="card">
@@ -885,7 +896,49 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     document.getElementById("quizNext").addEventListener("click", function() {
       curQ++;
       if (curQ < qs.length) loadQ(curQ);
-      else { show("memoryScreen"); initMemory(); }
+      else { show("funScreen"); initFunScreen(); }
+    });
+
+    /* ── 4.5. FUN TRANSITION ── */
+    function initFunScreen() {
+      var steps = [
+        { emoji:"🧠", title:"Quiz bitti!", sub:"Barış'ı çok iyi tanıyorsun... ya da tanımıyorsun 😂", icons:"" },
+        { emoji:"🎯", title:"Şimdi eğlenme zamanı!", sub:"Seni iki harika oyun bekliyor.", icons:"🃏 &nbsp; 🕹️" },
+        { emoji:"🐘", title:"Hazır mısın?", sub:"Hafıza oyunu ve bir macera seni bekliyor!", icons:"💪" },
+      ];
+      var i = 0;
+      var emojiEl = document.getElementById("funEmoji");
+      var titleEl = document.getElementById("funTitle");
+      var subEl   = document.getElementById("funSub");
+      var iconsEl = document.getElementById("funIcons");
+      var nextBtn = document.getElementById("funNext");
+      nextBtn.style.display = "none";
+
+      function showStep(idx) {
+        var s = steps[idx];
+        emojiEl.style.opacity = "0";
+        titleEl.style.opacity = "0";
+        subEl.style.opacity   = "0";
+        setTimeout(function() {
+          emojiEl.textContent  = s.emoji;
+          titleEl.textContent  = s.title;
+          subEl.textContent    = s.sub;
+          iconsEl.innerHTML    = s.icons;
+          emojiEl.style.transition = "opacity .4s";
+          titleEl.style.transition = "opacity .5s .1s";
+          subEl.style.transition   = "opacity .5s .2s";
+          emojiEl.style.opacity = "1";
+          titleEl.style.opacity = "1";
+          subEl.style.opacity   = "1";
+        }, 200);
+        i++;
+        if (i < steps.length) setTimeout(function(){ showStep(i); }, 2000);
+        else setTimeout(function(){ nextBtn.style.display = "inline-block"; }, 2200);
+      }
+      showStep(0);
+    }
+    document.getElementById("funNext").addEventListener("click", function() {
+      show("memoryScreen"); initMemory();
     });
 
     /* ── 5. MEMORY GAME ── */
