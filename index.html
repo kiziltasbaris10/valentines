@@ -432,7 +432,7 @@
       display: flex; align-items: center; justify-content: center;
       z-index: 10; overflow: hidden;
     }
-    #starCanvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    #starCanvas, #starCanvas2 { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
     .story-inner { text-align: center; padding: 40px 28px; max-width: 500px; position: relative; z-index: 2; }
     .story-hearts { font-size: 28px; margin-bottom: 24px; opacity: 0; transition: opacity 1s; letter-spacing: 8px; }
     .story-hearts.vis { opacity: 1; }
@@ -646,6 +646,18 @@
           <button id="btnRight" class="game-btn">▶</button>
         </div>
         <button id="btnJump" class="game-btn" style="flex:1; max-width:150px;">↑ ZIPLA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 7b. STORY END ════ -->
+  <div class="screen" id="storyEndScreen">
+    <div class="story-wrap">
+      <canvas id="starCanvas2"></canvas>
+      <div class="story-inner">
+        <div class="story-hearts" id="storyEndHearts">🤍 &nbsp; 💫 &nbsp; 🤍</div>
+        <div id="storyEndLines"></div>
+        <button class="story-start-btn" id="openLetterBtn">💌 Mektubu Aç</button>
       </div>
     </div>
   </div>
@@ -1034,6 +1046,64 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       setTimeout(next, 800);
     }
 
+    /* ── 6b. STORY END ── */
+    document.getElementById("openLetterBtn").addEventListener("click", function() { show("letterScreen"); });
+
+    function initStoryEnd() {
+      var sc = document.getElementById("starCanvas2");
+      sc.width = window.innerWidth; sc.height = window.innerHeight;
+      var sctx = sc.getContext("2d");
+      sctx.clearRect(0, 0, sc.width, sc.height);
+      for (var s = 0; s < 160; s++) {
+        var sx2 = Math.random()*sc.width, sy2 = Math.random()*sc.height;
+        var sr = Math.random()*1.6+0.3;
+        sctx.beginPath(); sctx.arc(sx2,sy2,sr,0,Math.PI*2);
+        sctx.fillStyle = "rgba(255,255,255,"+(Math.random()*0.7+0.2)+")"; sctx.fill();
+      }
+      var lines = [
+        { t:"And despite every storm, every distance,",              c:""       },
+        { t:"and every obstacle standing in their way…",             c:""       },
+        { t:"",                                                       c:""       },
+        { t:"the prince and the princess kept fighting side by side,",c:""      },
+        { t:"never giving up on each other.",                         c:"pink-c" },
+        { t:"",                                                       c:""       },
+        { t:"Because the love they carried in their hearts",          c:""       },
+        { t:"was stronger than fear, stronger than time,",            c:""       },
+        { t:"and stronger than the miles between them.",              c:"gold"   },
+        { t:"",                                                       c:""       },
+        { t:"Through every difficult moment,",                        c:""       },
+        { t:"they chose one another again and again.",                c:"pink-c" },
+        { t:"",                                                       c:""       },
+        { t:"And in the end, love won.",                              c:"gold"   },
+        { t:"",                                                       c:""       },
+        { t:"From that day on, they walked through life together —",  c:""       },
+        { t:"hand in hand, heart to heart —",                        c:"pink-c" },
+        { t:"creating a story far more beautiful than any fairy tale.",c:""      },
+        { t:"",                                                       c:""       },
+        { t:"And they lived happily ever after… 🤍",                 c:"gold"   },
+      ];
+      var cont = document.getElementById("storyEndLines");
+      var btn  = document.getElementById("openLetterBtn");
+      var hrt  = document.getElementById("storyEndHearts");
+      cont.innerHTML = ""; btn.style.display = "none"; hrt.classList.remove("vis");
+      setTimeout(function(){ hrt.classList.add("vis"); }, 300);
+      var els = [];
+      for (var i = 0; i < lines.length; i++) {
+        var d = document.createElement("div");
+        d.className = "story-line " + lines[i].c;
+        d.textContent = lines[i].t || " ";
+        cont.appendChild(d); els.push(d);
+      }
+      var idx = 0;
+      function next() {
+        if (idx >= els.length) { setTimeout(function(){ btn.style.display = "inline-block"; }, 700); return; }
+        els[idx].classList.add("vis");
+        var delay = lines[idx].t ? 1900 : 600;
+        idx++; setTimeout(next, delay);
+      }
+      setTimeout(next, 800);
+    }
+
     /* ── 7. GAME ── */
     function drawBaris(ctx, x, y, flip) {
       ctx.save();
@@ -1043,17 +1113,17 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       ctx.fillStyle = "#2a6b45";
       ctx.beginPath(); ctx.roundRect(x+4, y+22, 22, 14, 4); ctx.fill();
       // Neck
-      ctx.fillStyle = "#c8845a";
+      ctx.fillStyle = "#fde8ce";
       ctx.fillRect(x+11, y+19, 8, 5);
       // Head
-      ctx.fillStyle = "#c8845a";
+      ctx.fillStyle = "#fde8ce";
       ctx.beginPath(); ctx.arc(cx, y+12, 11, 0, Math.PI*2); ctx.fill();
       // Buzz cut – very short dark
       ctx.fillStyle = "#111";
       ctx.beginPath(); ctx.arc(cx, y+12, 11, Math.PI, Math.PI*2); ctx.fill();
       ctx.fillRect(x+4, y+5, 22, 7);
       // Ears
-      ctx.fillStyle = "#c8845a";
+      ctx.fillStyle = "#fde8ce";
       ctx.beginPath(); ctx.arc(x+4, y+13, 3, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(x+26, y+13, 3, 0, Math.PI*2); ctx.fill();
       // Eyes
@@ -1090,8 +1160,8 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       // Head
       ctx.fillStyle = "#f0c0a0";
       ctx.beginPath(); ctx.arc(cx, y+12, 11, 0, Math.PI*2); ctx.fill();
-      // Dark curly hair
-      ctx.fillStyle = "#0f0500";
+      // Brown curly hair
+      ctx.fillStyle = "#7b4820";
       ctx.beginPath(); ctx.arc(cx, y+8, 12, Math.PI, Math.PI*1.96); ctx.fill();
       ctx.beginPath(); ctx.arc(cx-2, y+5, 9, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(x+3, y+16, 5, 0, Math.PI*2); ctx.fill();
@@ -1209,7 +1279,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
           if (p.y > H+80) { gameDead=true; deadTick=55; }
           if (p.x+p.w > prX && p.x < prX+36 && p.y+p.h > prY) {
             gameWon=true;
-            setTimeout(function(){ burst(); show("letterScreen"); },1600);
+            setTimeout(function(){ burst(); show("storyEndScreen"); initStoryEnd(); },1600);
           }
         } else if (gameDead) { if (--deadTick<=0) resetP(); }
 
