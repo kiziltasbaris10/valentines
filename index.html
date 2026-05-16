@@ -342,8 +342,6 @@
 <body>
   <canvas id="confettiCanvas"></canvas>
 
-  <!-- Music toggle button -->
-
   <!-- ════ 1. LOADING ════ -->
   <div class="screen active" id="loadingScreen">
     <div class="loading-card">
@@ -506,12 +504,15 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     resizeCnv();
     window.addEventListener("resize", resizeCnv);
     window.addEventListener("orientationchange", () => setTimeout(resizeCnv, 150));
-    const ci = confetti.create(cnv, { resize: false, useWorker: true });
-    const burst = () => ci({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: .5, y: .6 } });
+    let ci = function() {};
+    try { ci = confetti.create(cnv, { resize: false, useWorker: true }); } catch(e) {}
+    const burst = () => { try { ci({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: .5, y: .6 } }); } catch(e) {} };
     const bigBurst = () => {
-      const end = Date.now() + 2200;
-      (function f() { ci({ particleCount: 13, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * .3 } }); if (Date.now() < end) requestAnimationFrame(f); })();
-      setTimeout(() => ci({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: .5, y: .55 } }), 400);
+      try {
+        const end = Date.now() + 2200;
+        (function f() { ci({ particleCount: 13, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * .3 } }); if (Date.now() < end) requestAnimationFrame(f); })();
+        setTimeout(() => ci({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: .5, y: .55 } }), 400);
+      } catch(e) {}
     };
 
     /* ── SCREEN NAV ── */
@@ -575,7 +576,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       if (Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY) < 140) moveNo(e.clientX, e.clientY);
     });
     noBtn.addEventListener("click", e => e.preventDefault());
-    yesBtn.addEventListener("click", () => { burst(); show("quizScreen"); loadQ(0); });
+    yesBtn.addEventListener("click", () => { burst(); curQ = 0; show("quizScreen"); loadQ(0); });
 
     /* ── 4. QUIZ ── */
     const qs = [
