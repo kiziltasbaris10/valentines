@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
+  <title>Barış & Polen 💕</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
+      --pink: #ff3b7a;
+      --pink-hover: #ff1f68;
+      --pink-light: #ffd6e7;
+      --pink-xlight: #ffeef6;
+      --card-bg: #ffffffcc;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,171 +20,321 @@
       min-height: 100svh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      background: radial-gradient(circle at top, var(--pink-xlight), var(--pink-light));
       font-family: system-ui, sans-serif;
       padding: 16px;
     }
 
     #confettiCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 9999;
+      position: fixed; inset: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none; z-index: 9999;
     }
 
+    .screen { display: none; width: 100%; }
+    .screen.active { display: block; animation: pop .35s ease; }
+
     .card {
-      width: min(720px, 92vw);
-      padding: 26px 22px;
-      background: var(--card);
+      width: min(680px, 92vw);
+      margin: 0 auto;
+      padding: 28px 24px;
+      background: var(--card-bg);
       backdrop-filter: blur(10px);
       border-radius: 22px;
       text-align: center;
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
     }
 
-    /* ── VALENTINE SCREEN ── */
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+    @keyframes pop {
+      from { transform: scale(.97); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
     }
 
-    h1 {
-      font-size: clamp(22px, 4vw, 40px);
-      margin: 12px 0 18px;
-    }
-
-    .button-zone {
-      position: relative;
-      width: min(520px, 92%);
-      height: 150px;
-      margin: 0 auto;
-      touch-action: none;
-    }
-
-    button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 16px 24px;
-      font-size: 18px;
+    /* ── shared button ── */
+    .btn-pink {
+      display: inline-block;
+      padding: 15px 38px;
+      background: var(--pink);
+      color: #fff;
+      font-size: 17px;
       font-weight: 800;
       border-radius: 999px;
       border: none;
       cursor: pointer;
+      box-shadow: 0 8px 24px rgba(255,59,122,.35);
+      transition: transform .12s, background .12s;
+      position: relative; top: unset; left: unset; transform: none;
+    }
+    .btn-pink:hover { background: var(--pink-hover); transform: translateY(-2px); }
+
+    /* ════════════════════════════
+       1. LOADING SCREEN
+    ════════════════════════════ */
+    .loading-card {
+      width: min(440px, 92vw);
+      margin: 0 auto;
+      padding: 40px 30px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 22px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.15);
+      text-align: center;
+    }
+    .loading-emoji { font-size: 58px; margin-bottom: 14px; display: block; animation: bounce 1s ease infinite; }
+    .loading-title { font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 22px; }
+    .loading-bar-wrap { background: var(--pink-light); border-radius: 99px; height: 12px; overflow: hidden; margin-bottom: 14px; }
+    .loading-bar-fill { height: 100%; background: linear-gradient(90deg, var(--pink), #ff6b9d); border-radius: 99px; width: 0%; transition: width .25s ease; }
+    .loading-msg { font-size: 14px; color: #777; min-height: 22px; }
+    .loading-pct { font-size: 30px; font-weight: 900; color: var(--pink); margin-top: 6px; }
+
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    /* ════════════════════════════
+       2. LANDING SCREEN
+    ════════════════════════════ */
+    .warning-badge {
+      display: inline-block;
+      background: #e53e3e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      animation: pulse 1.4s ease infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+
+    .landing-title { font-size: clamp(34px, 7vw, 58px); font-weight: 900; margin-bottom: 10px; }
+    .landing-body  { font-size: clamp(14px, 2.5vw, 17px); color: #444; line-height: 1.7; margin-bottom: 18px; }
+    .landing-warn-box {
+      display: inline-block;
+      background: #fffbeb;
+      border: 2px solid #f6c90e;
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #7a5800;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    /* ════════════════════════════
+       3. VALENTINE SCREEN
+    ════════════════════════════ */
+    .art {
+      width: min(240px, 75vw);
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+    }
+    .val-h1 { font-size: clamp(21px, 4vw, 38px); margin: 10px 0 18px; }
+
+    .button-zone {
+      position: relative;
+      width: min(500px, 92%);
+      height: 140px;
+      margin: 0 auto;
+      touch-action: none;
+    }
+    .val-btn {
+      position: absolute; top: 50%;
+      transform: translateY(-50%);
+      padding: 15px 24px;
+      font-size: 17px; font-weight: 800;
+      border-radius: 999px; border: none; cursor: pointer;
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      user-select: none; -webkit-tap-highlight-color: transparent;
       transition: transform .12s ease, background .12s ease;
     }
+    #yesBtn { left: 16%; background: var(--pink); color: #fff; }
+    #yesBtn:hover { background: var(--pink-hover); }
+    #noBtn  { left: 60%; background: #e5e7eb; color: #111827; }
+    .hint   { margin-top: 10px; font-size: 13px; opacity: .65; }
 
-    #yesBtn { left: 18%; background: var(--yes); color: #fff; }
-    #yesBtn:hover { background: var(--yesHover); }
-    #noBtn  { left: 62%; background: #e5e7eb; color: #111827; }
-
-    .hint { margin-top: 10px; font-size: 13px; opacity: .7; }
-
-    /* ── QUIZ SCREEN ── */
-    #quizScreen { display: none; }
-
-    .progress-bar-wrap {
-      background: #ffd6e7;
-      border-radius: 99px;
-      height: 8px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--yes);
-      border-radius: 99px;
-      transition: width .4s ease;
-    }
-
-    .question-count {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .question-text {
-      font-size: clamp(17px, 3vw, 24px);
-      font-weight: 700;
-      margin-bottom: 22px;
-      line-height: 1.35;
-    }
-
-    .options {
-      display: grid;
-      gap: 12px;
-    }
-
-    .option-btn {
-      position: static;
-      top: unset;
-      transform: none;
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 14px;
-      border: 2.5px solid #ffd6e7;
-      background: #fff;
-      color: #222;
-      cursor: pointer;
-      text-align: left;
+    /* ════════════════════════════
+       4. QUIZ SCREEN
+    ════════════════════════════ */
+    .progress-wrap { background: var(--pink-light); border-radius: 99px; height: 8px; margin-bottom: 18px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--pink); border-radius: 99px; transition: width .4s ease; }
+    .q-count { font-size: 13px; color: #888; margin-bottom: 6px; }
+    .q-text  { font-size: clamp(16px, 3vw, 22px); font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
+    .options { display: grid; gap: 10px; }
+    .opt-btn {
+      position: static; top: unset; left: unset; transform: none;
+      width: 100%; padding: 13px 16px;
+      font-size: 15px; font-weight: 600;
+      border-radius: 13px; border: 2.5px solid var(--pink-light);
+      background: #fff; color: #222; cursor: pointer; text-align: left;
       transition: background .15s, border-color .15s, transform .1s;
-      box-shadow: 0 4px 12px rgba(0,0,0,.07);
+      box-shadow: 0 3px 10px rgba(0,0,0,.06);
     }
-    .option-btn:hover { background: #fff0f6; border-color: var(--yes); transform: translateY(-2px); }
-    .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
-    .option-btn.wrong   { background: #f8d7da; border-color: #dc3545; color: #721c24; }
-    .option-btn:disabled { cursor: default; transform: none; }
-
-    .feedback {
-      margin-top: 16px;
-      font-size: 15px;
-      font-weight: 600;
-      min-height: 24px;
-      color: #dc3545;
-      animation: pop .25s ease;
-    }
-
-    .next-btn {
-      position: static;
-      top: unset;
-      transform: none;
-      margin-top: 18px;
-      padding: 14px 36px;
-      background: var(--yes);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
+    .opt-btn:hover        { background: #fff0f6; border-color: var(--pink); transform: translateY(-2px); }
+    .opt-btn.correct      { background: #d4edda; border-color: #28a745; color: #155724; }
+    .opt-btn.wrong        { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    .opt-btn:disabled     { cursor: default; transform: none; }
+    .quiz-feedback        { margin-top: 14px; font-size: 15px; font-weight: 600; min-height: 22px; }
+    .quiz-next {
+      position: static; top: unset; left: unset; transform: none;
+      margin-top: 16px; padding: 13px 34px;
+      background: var(--pink); color: #fff;
+      font-size: 15px; font-weight: 700;
+      border-radius: 999px; border: none; cursor: pointer;
       display: none;
       box-shadow: 0 8px 20px rgba(255,59,122,.3);
     }
-    .next-btn:hover { background: var(--yesHover); }
+    .quiz-next:hover { background: var(--pink-hover); }
 
-    /* ── FINAL SCREEN ── */
-    #finalScreen { display: none; }
-    #finalScreen h2 { font-size: clamp(28px, 5vw, 48px); margin: 16px 0 8px; }
-    #finalScreen p  { font-size: 17px; opacity: .75; margin-bottom: 16px; }
-    .fireworks {
-      width: min(340px, 90vw);
-      margin: 0 auto;
-      display: block;
-      border-radius: 16px;
+    /* ════════════════════════════
+       5. MEMORY GAME
+    ════════════════════════════ */
+    .mem-title    { font-size: clamp(20px, 4vw, 30px); font-weight: 800; margin-bottom: 4px; }
+    .mem-subtitle { font-size: 14px; color: #888; margin-bottom: 14px; }
+    .mem-pairs    { font-size: 14px; color: #666; margin-bottom: 14px; font-weight: 600; }
+
+    .mem-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      max-width: 360px;
+      margin: 0 auto 20px;
     }
 
-    @keyframes pop {
-      from { transform: scale(.9); opacity: 0; }
-      to   { transform: scale(1);  opacity: 1; }
+    .mem-card {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      perspective: 600px;
+    }
+    .mem-card-inner {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .4s ease;
+      border-radius: 12px;
+    }
+    .mem-card.flipped .mem-card-inner { transform: rotateY(180deg); }
+
+    .mem-front, .mem-back {
+      position: absolute; inset: 0;
+      border-radius: 12px;
+      backface-visibility: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mem-front {
+      background: linear-gradient(135deg, var(--pink), #ff6b9d);
+      color: #fff; font-size: 22px; font-weight: 900;
+      box-shadow: 0 4px 12px rgba(255,59,122,.3);
+    }
+    .mem-back {
+      background: #fff;
+      border: 2.5px solid var(--pink-light);
+      transform: rotateY(180deg);
+      font-size: clamp(22px, 5vw, 34px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+    .mem-card.matched .mem-back { background: #d4edda; border-color: #28a745; }
+
+    /* ════════════════════════════
+       6. LETTER SCREEN
+    ════════════════════════════ */
+    .letter-title    { font-size: clamp(20px, 3.5vw, 28px); font-weight: 800; margin-bottom: 4px; }
+    .letter-subtitle { font-size: 14px; color: #888; margin-bottom: 22px; }
+
+    .envelope-wrap {
+      width: 200px; height: 140px;
+      margin: 0 auto 8px;
+      cursor: pointer;
+      position: relative;
+    }
+    .env-body {
+      position: absolute; inset: 0;
+      background: #ffe0ec;
+      border: 2px solid #ffb3cc;
+      border-radius: 6px;
+    }
+    .env-flap {
+      position: absolute; top: 0; left: 0; right: 0; height: 70px;
+      background: #ffb3cc;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transition: transform .5s ease;
+      z-index: 2;
+    }
+    .envelope-wrap.open .env-flap { transform: rotateX(180deg); }
+
+    .env-tri-l {
+      position: absolute; bottom: 0; left: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 70px 0 0 100px;
+      border-color: transparent transparent transparent #ffccd9;
+    }
+    .env-tri-r {
+      position: absolute; bottom: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 70px 100px 0 0;
+      border-color: transparent #ffccd9 transparent transparent;
+    }
+    .env-heart {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px; z-index: 3;
+    }
+    .env-hint { font-size: 13px; color: #bbb; margin-bottom: 20px; }
+
+    .letter-content {
+      display: none;
+      background: #fffef5;
+      border: 1px solid #f0e8c8;
+      border-radius: 14px;
+      padding: 28px 28px 22px;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      animation: slideUp .5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .letter-content::before {
+      content: '';
+      position: absolute; left: 58px; top: 0; bottom: 0;
+      width: 1px; background: #ffd0d0;
+    }
+    .letter-text {
+      font-family: Georgia, serif;
+      font-size: 14.5px;
+      line-height: 2;
+      color: #333;
+      white-space: pre-line;
+    }
+    .letter-sig {
+      margin-top: 22px;
+      font-family: Georgia, serif;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--pink);
+      text-align: right;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(18px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ════════════════════════════
+       7. FINAL SCREEN
+    ════════════════════════════ */
+    .final-h2 { font-size: clamp(26px, 5vw, 44px); margin: 14px 0 8px; }
+    .final-p  { font-size: 16px; opacity: .7; margin-bottom: 18px; }
+    .fireworks {
+      width: min(320px, 88vw);
+      margin: 0 auto; display: block;
+      border-radius: 14px;
     }
   </style>
 </head>
@@ -192,10 +342,41 @@
 <body>
   <canvas id="confettiCanvas"></canvas>
 
-  <main class="card">
+  <!-- ════ 1. LOADING ════ -->
+  <div class="screen active" id="loadingScreen">
+    <div class="loading-card">
+      <span class="loading-emoji">🐘</span>
+      <div class="loading-title">Yükleniyor...</div>
+      <div class="loading-bar-wrap">
+        <div class="loading-bar-fill" id="loadBar"></div>
+      </div>
+      <div class="loading-msg" id="loadMsg">Başlatılıyor...</div>
+      <div class="loading-pct" id="loadPct">0%</div>
+    </div>
+  </div>
 
-    <!-- ═══════════ VALENTINE SCREEN ═══════════ -->
-    <div id="valentineScreen">
+  <!-- ════ 2. LANDING ════ -->
+  <div class="screen" id="landingScreen">
+    <div class="card">
+      <div class="warning-badge">⚠️ DİKKAT</div>
+      <div class="landing-title">POLEN! 📢</div>
+      <p class="landing-body">
+        Bu siteye girmen bir tesadüf değil...<br>
+        <strong>Barış haftalarca burada çalıştı.</strong><br>
+        Lütfen takdir et. 😂
+      </p>
+      <div class="landing-warn-box">
+        ⚠️ Uyarı: Bu site aşırı tatlılık içerir 🐘<br>
+        Yan etkiler: gülümseme, kızarma ve "ayyy" deme
+      </div>
+      <br>
+      <button class="btn-pink" id="startBtn">Başlamaya Cesaret Et →</button>
+    </div>
+  </div>
+
+  <!-- ════ 3. VALENTINE ════ -->
+  <div class="screen" id="valentineScreen">
+    <div class="card">
       <svg class="art" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="elBody" x1="0" y1="0" x2="1" y2="1">
@@ -204,7 +385,7 @@
           <linearGradient id="elLight" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#cfd8dc"/><stop offset="1" stop-color="#b0bec5"/>
           </linearGradient>
-          <linearGradient id="heart" x1="0" x2="1">
+          <linearGradient id="heartG" x1="0" x2="1">
             <stop offset="0" stop-color="#ff4d7d"/><stop offset="1" stop-color="#ff1f68"/>
           </linearGradient>
         </defs>
@@ -228,162 +409,160 @@
         <path d="M148 135 Q160 145 172 135" stroke="#546e7a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
         <ellipse cx="122" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
         <ellipse cx="198" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
-        <path d="M118 208 C118 197 130 192 136 200 C142 192 154 197 154 208 C154 222 136 232 136 238 C136 232 118 222 118 208Z" fill="url(#heart)"/>
+        <path d="M118 208 C118 197 130 192 136 200 C142 192 154 197 154 208 C154 222 136 232 136 238 C136 232 118 222 118 208Z" fill="url(#heartG)"/>
         <path d="M246 175 C260 168 268 155 264 148" stroke="#78909c" stroke-width="5" fill="none" stroke-linecap="round"/>
         <circle cx="264" cy="146" r="5" fill="#b0bec5"/>
       </svg>
-
-      <h1>Polen, will you be my valentine? 💕</h1>
-
+      <h1 class="val-h1">Polen, will you be my valentine? 💕</h1>
       <section class="button-zone" id="zone">
-        <button id="yesBtn">Yes 💖</button>
-        <button id="noBtn">No</button>
+        <button class="val-btn" id="yesBtn">Yes 💖</button>
+        <button class="val-btn" id="noBtn">No</button>
       </section>
-      <div class="hint" id="hint">"No" seems a bit shy 😈</div>
+      <div class="hint">"No" seems a bit shy 😈</div>
     </div>
+  </div>
 
-    <!-- ═══════════ QUIZ SCREEN ═══════════ -->
-    <div id="quizScreen">
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  <!-- ════ 4. QUIZ ════ -->
+  <div class="screen" id="quizScreen">
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
       </div>
-      <div class="question-count" id="questionCount">Question 1 / 10</div>
-      <div class="question-text" id="questionText"></div>
-      <div class="options" id="optionsContainer"></div>
-      <div class="feedback" id="feedback"></div>
-      <button class="next-btn" id="nextBtn">Next ➡️</button>
+      <div class="q-count" id="qCount">Question 1 / 10</div>
+      <div class="q-text"  id="qText"></div>
+      <div class="options" id="options"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <button class="quiz-next" id="quizNext">Next ➡️</button>
     </div>
+  </div>
 
-    <!-- ═══════════ FINAL SCREEN ═══════════ -->
-    <div id="finalScreen">
-      <h2>You two know each other perfectly! 💞</h2>
-      <p>Barış loves you so much, Polen 🐘❤️</p>
+  <!-- ════ 5. MEMORY GAME ════ -->
+  <div class="screen" id="memoryScreen">
+    <div class="card">
+      <div class="mem-title">🃏 Hafıza Oyunu</div>
+      <div class="mem-subtitle">Eşleşen kartları bul!</div>
+      <div class="mem-pairs" id="memPairs">5 çift kaldı</div>
+      <div class="mem-grid" id="memGrid"></div>
+      <button class="btn-pink" id="memNext" style="display:none">Mektubu Aç 💌</button>
+    </div>
+  </div>
+
+  <!-- ════ 6. LETTER ════ -->
+  <div class="screen" id="letterScreen">
+    <div class="card">
+      <div class="letter-title">💌 Sana Bir Mektup Var</div>
+      <div class="letter-subtitle">Zarfa tıkla ve aç...</div>
+
+      <div class="envelope-wrap" id="envWrap">
+        <div class="env-body"></div>
+        <div class="env-flap"></div>
+        <div class="env-tri-l"></div>
+        <div class="env-tri-r"></div>
+        <div class="env-heart">💌</div>
+      </div>
+      <div class="env-hint" id="envHint">👆 Zarfa tıkla</div>
+
+      <div class="letter-content" id="letterContent">
+        <div class="letter-text">Bu mektup, dünyanın en güzel sevgilisine…
+
+Cümlelerime nasıl başlayacağımı gerçekten bilmiyorum. Çünkü insan, kalbinin en derininde taşıdığı duyguları kelimelere dökmeye çalışınca, bazen hiçbir cümle yeterli gelmiyor. Şu anda aramızda yaklaşık 8200 kilometre var ama sana ilk çiçek gönderdiğim gün yazdığım notu yeniden hatırlamanı istiyorum: Mesafeler, gerçekten seven iki insanın arasındaki bağı zayıflatamaz.
+
+Hayatım boyunca iyisiyle kötüsüyle birçok kırılma noktası yaşadım. Ama 31 Ekim'de sana o mesajı atmak, belki de hayatımda verdiğim en güzel ve en doğru kararlardan biriydi. Çünkü sen, o günden beri bana bu ilişki için her zaman "iyi ki" dedirttin. Sevginle, anlayışınla, tertemiz kalbinle… Küçük hesapların peşinde koşmayan, sevgisini hissettirmekten korkmayan o güzel ruhunla hayatıma dokundun.
+
+Emin ol, bugün sana karşı böylesine sevgi dolu, böylesine huzurlu biri olabiliyorsam, bunun en büyük sebebi sensin. İnsan bazen birinin varlığıyla değişir ya… Ben de seninle birlikte daha güzel birine dönüştüm.
+
+Zaman zaman tartışsak da, sinirlensek de, hayat bizi yorsa da hiçbir şey aramızdaki bağı koparabilecek kadar güçlü değil. Çünkü bizim aramızdaki şey sadece bir ilişki değil; emek, sadakat, özlem ve birbirine inanmanın en gerçek hali.
+
+Şu anda bu satırları okurken, beyaz atlı prensin Yaman Köper dünyanın öteki ucunda kendi savaşlarını veriyor. Ama bilmeni istediğim bir şey var: Seni sevmenin verdiği güçle, seninle ortak bir gelecek kurabilmek için savaşmaya devam ediyor… ve her zaman edecek.
+
+Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
+        <div class="letter-sig">Maple Leaf diyarından,<br>Barış 🍁</div>
+        <br>
+        <button class="btn-pink" id="letterNext" style="margin-top:14px">Son Sürpriz ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 7. FINAL ════ -->
+  <div class="screen" id="finalScreen">
+    <div class="card">
+      <h2 class="final-h2">Seni çok seviyorum Polen! 💞</h2>
+      <p class="final-p">Barış seninle her saniyeye değer 🐘❤️</p>
       <img class="fireworks" src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" alt="Fireworks"/>
     </div>
-
-  </main>
+  </div>
 
   <script>
-    /* ── QUESTIONS ── */
-    const questions = [
-      {
-        q: "When did Barış first message you?",
-        options: ["November 5", "December 31", "October 31", "September 19"],
-        answer: 2
-      },
-      {
-        q: "When did Barış first send you flowers?",
-        options: ["December 25", "November 20", "October 30", "January 23"],
-        answer: 1
-      },
-      {
-        q: "What was the first meal you and Barış ate together?",
-        options: ["Iskender", "Sushi", "Doner", "Pide"],
-        answer: 2
-      },
-      {
-        q: "Where did we first meet?",
-        options: ["At school", "At a café", "At a bar", "On social media"],
-        answer: 0
-      },
-      {
-        q: "What does Barış love most about Polen?",
-        options: ["Her beauty", "Her vision in life", "Her intelligence", "All of them"],
-        answer: 3
-      },
-      {
-        q: "What was the final score of the air hockey game Polen won in Milan?",
-        options: ["Polen won 5–1", "Polen won 5–2", "Polen won 5–3", "Polen won 5–4"],
-        answer: 3
-      },
-      {
-        q: "What McDonald's menu did they eat on Valentine's Day?",
-        options: ["Big Mac Menu", "Whopper Menu", "Chicken Burger Menu"],
-        answer: 0
-      },
-      {
-        q: "Who is the person Barış wishes he had met most in your life?",
-        options: ["Emel Mommy", "Mert Reis", "Pamir", "Grandma Fadik"],
-        answer: 3
-      },
-      {
-        q: "What is Barış's favorite food?",
-        options: ["Fresh green beans", "Manti", "Pizza", "Lahmacun"],
-        answer: 0
-      },
-      {
-        q: "Which terminal did Barış wait for Polen at Malpensa Airport?",
-        options: ["Terminal 5", "Terminal 7", "Terminal 9", "Terminal 1"],
-        answer: 1
-      }
-    ];
-
-    const wrongMessages = [
-      "Hmmm, are you sure? 🤔",
-      "Not quite! Try again 😏",
-      "I don't think so... 😄",
-      "Nope! Give it another shot 💭",
-      "Hmm, that's not right 😈",
-      "Think again! 🙈"
-    ];
-
-    /* ── DOM ── */
-    const valentineScreen = document.getElementById("valentineScreen");
-    const quizScreen      = document.getElementById("quizScreen");
-    const finalScreen     = document.getElementById("finalScreen");
-    const zone            = document.getElementById("zone");
-    const yesBtn          = document.getElementById("yesBtn");
-    const noBtn           = document.getElementById("noBtn");
-    const hint            = document.getElementById("hint");
-    const progressFill    = document.getElementById("progressFill");
-    const questionCount   = document.getElementById("questionCount");
-    const questionText    = document.getElementById("questionText");
-    const optionsContainer= document.getElementById("optionsContainer");
-    const feedback        = document.getElementById("feedback");
-    const nextBtn         = document.getElementById("nextBtn");
-    const confettiCanvas  = document.getElementById("confettiCanvas");
-
     /* ── CONFETTI ── */
-    function resizeCanvas() {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      confettiCanvas.width  = Math.floor(window.innerWidth  * dpr);
-      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
-      confettiCanvas.style.width  = "100vw";
-      confettiCanvas.style.height = "100vh";
+    const cnv = document.getElementById("confettiCanvas");
+    function resizeCnv() {
+      const d = Math.max(1, window.devicePixelRatio || 1);
+      cnv.width  = Math.floor(window.innerWidth  * d);
+      cnv.height = Math.floor(window.innerHeight * d);
+      cnv.style.width = "100vw"; cnv.style.height = "100vh";
     }
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 150));
+    resizeCnv();
+    window.addEventListener("resize", resizeCnv);
+    window.addEventListener("orientationchange", () => setTimeout(resizeCnv, 150));
+    const ci = confetti.create(cnv, { resize: false, useWorker: true });
+    const burst = () => ci({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: .5, y: .6 } });
+    const bigBurst = () => {
+      const end = Date.now() + 2200;
+      (function f() { ci({ particleCount: 13, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * .3 } }); if (Date.now() < end) requestAnimationFrame(f); })();
+      setTimeout(() => ci({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: .5, y: .55 } }), 400);
+    };
 
-    const confettiInst = confetti.create(confettiCanvas, { resize: false, useWorker: true });
-
-    function burstConfetti() {
-      confettiInst({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: 0.5, y: 0.6 } });
+    /* ── SCREEN NAV ── */
+    function show(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo(0, 0);
+      resizeCnv();
     }
 
-    function finalConfetti() {
-      const end = Date.now() + 1800;
-      (function frame() {
-        confettiInst({ particleCount: 12, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * 0.3 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-      setTimeout(() => confettiInst({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: 0.5, y: 0.55 } }), 400);
+    /* ── 1. LOADING ── */
+    const loadBar = document.getElementById("loadBar");
+    const loadMsg = document.getElementById("loadMsg");
+    const loadPct = document.getElementById("loadPct");
+    const steps = [
+      { pct: 0,   msg: "Başlatılıyor... 🔄" },
+      { pct: 18,  msg: "Barış'ın sevgisi yükleniyor... ❤️" },
+      { pct: 38,  msg: "Filler hazırlanıyor... 🐘" },
+      { pct: 57,  msg: "Sütlaç soğutuluyor... 🍮" },
+      { pct: 74,  msg: "Yonca tarlaları sulanıyor... 🍀" },
+      { pct: 88,  msg: "Neredeyse hazır... belki... 🤔" },
+      { pct: 99,  msg: "Tamam hazır! Gir artık 😂" },
+      { pct: 100, msg: "✅ Hazır!" },
+    ];
+    let si = 0, curPct = 0;
+    function animLoad() {
+      if (si >= steps.length) { setTimeout(() => show("landingScreen"), 400); return; }
+      const target = steps[si].pct;
+      loadMsg.textContent = steps[si].msg;
+      si++;
+      const iv = setInterval(() => {
+        if (curPct >= target) { clearInterval(iv); setTimeout(animLoad, 620); return; }
+        curPct++;
+        loadBar.style.width = curPct + "%";
+        loadPct.textContent = curPct + "%";
+      }, 16);
     }
+    setTimeout(animLoad, 500);
 
-    /* ── NO BUTTON ESCAPE ── */
+    /* ── 2. LANDING ── */
+    document.getElementById("startBtn").addEventListener("click", () => show("valentineScreen"));
+
+    /* ── 3. VALENTINE ── */
+    const zone   = document.getElementById("zone");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
     let yesScale = 1;
-    function growYes() {
-      yesScale = Math.min(2.2, yesScale + 0.1);
-      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-    }
-    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+    const growYes = () => { yesScale = Math.min(2.2, yesScale + 0.1); yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`; };
+    const clamp   = (n, a, b) => Math.max(a, Math.min(b, n));
     function moveNo(px, py) {
-      const z = zone.getBoundingClientRect();
-      const b = noBtn.getBoundingClientRect();
-      let dx = (b.left + b.width  / 2) - px;
-      let dy = (b.top  + b.height / 2) - py;
-      const mag = Math.hypot(dx, dy) || 1;
-      dx /= mag; dy /= mag;
+      const z = zone.getBoundingClientRect(), b = noBtn.getBoundingClientRect();
+      let dx = (b.left + b.width/2) - px, dy = (b.top + b.height/2) - py;
+      const m = Math.hypot(dx, dy) || 1; dx /= m; dy /= m;
       noBtn.style.left      = clamp((b.left - z.left) + dx * 150, 0, z.width  - b.width)  + "px";
       noBtn.style.top       = clamp((b.top  - z.top)  + dy * 150, 0, z.height - b.height) + "px";
       noBtn.style.transform = "none";
@@ -394,70 +573,117 @@
       if (Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY) < 140) moveNo(e.clientX, e.clientY);
     });
     noBtn.addEventListener("click", e => e.preventDefault());
+    yesBtn.addEventListener("click", () => { burst(); show("quizScreen"); loadQ(0); });
 
-    /* ── YES → START QUIZ ── */
-    yesBtn.addEventListener("click", () => {
-      valentineScreen.style.display = "none";
-      quizScreen.style.display = "block";
-      resizeCanvas();
-      burstConfetti();
-      loadQuestion(0);
-    });
+    /* ── 4. QUIZ ── */
+    const qs = [
+      { q: "When did Barış first message you?",                              opts: ["November 5","December 31","October 31","September 19"], a: 2 },
+      { q: "When did Barış first send you flowers?",                         opts: ["December 25","November 20","October 30","January 23"],  a: 1 },
+      { q: "What was the first meal you and Barış ate together?",            opts: ["Iskender","Sushi","Doner","Pide"],                       a: 2 },
+      { q: "Where did we first meet?",                                       opts: ["At school","At a café","At a bar","On social media"],    a: 0 },
+      { q: "What does Barış love most about Polen?",                         opts: ["Her beauty","Her vision in life","Her intelligence","All of them"], a: 3 },
+      { q: "What was the final score of the air hockey game Polen won in Milan?", opts: ["Polen won 5–1","Polen won 5–2","Polen won 5–3","Polen won 5–4"], a: 3 },
+      { q: "What McDonald's menu did they eat on Valentine's Day?",           opts: ["Big Mac Menu","Whopper Menu","Chicken Burger Menu"],     a: 0 },
+      { q: "Who is the person Barış wishes he had met most in your life?",   opts: ["Emel Mommy","Mert Reis","Pamir","Grandma Fadik"],        a: 3 },
+      { q: "What is Barış's favorite food?",                                 opts: ["Fresh green beans","Manti","Pizza","Lahmacun"],          a: 0 },
+      { q: "Which terminal did Barış wait for Polen at Malpensa Airport?",   opts: ["Terminal 5","Terminal 7","Terminal 9","Terminal 1"],     a: 1 },
+    ];
+    const wrongs = ["Hmmm, are you sure? 🤔","Not quite! Try again 😏","I don't think so... 😄","Nope! Give it another shot 💭","Hmm, that's not right 😈","Think again! 🙈"];
+    const pFill   = document.getElementById("progressFill");
+    const qCount  = document.getElementById("qCount");
+    const qText   = document.getElementById("qText");
+    const optsCon = document.getElementById("options");
+    const qFb     = document.getElementById("quizFeedback");
+    const qNext   = document.getElementById("quizNext");
+    let curQ = 0;
 
-    /* ── QUIZ LOGIC ── */
-    let current = 0;
-
-    function loadQuestion(idx) {
-      const q = questions[idx];
-      progressFill.style.width = (idx / questions.length * 100) + "%";
-      questionCount.textContent = `Question ${idx + 1} / ${questions.length}`;
-      questionText.textContent  = q.q;
-      feedback.textContent = "";
-      nextBtn.style.display = "none";
-
-      optionsContainer.innerHTML = "";
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.textContent = `${["A","B","C","D"][i]}) ${opt}`;
-        btn.addEventListener("click", () => handleAnswer(i, q.answer));
-        optionsContainer.appendChild(btn);
+    function loadQ(idx) {
+      const q = qs[idx];
+      pFill.style.width = (idx / qs.length * 100) + "%";
+      qCount.textContent = `Question ${idx + 1} / ${qs.length}`;
+      qText.textContent  = q.q;
+      qFb.textContent    = "";
+      qNext.style.display = "none";
+      optsCon.innerHTML  = "";
+      q.opts.forEach((o, i) => {
+        const b = document.createElement("button");
+        b.className = "opt-btn";
+        b.textContent = `${["A","B","C","D"][i]}) ${o}`;
+        b.addEventListener("click", () => answerQ(i, q.a));
+        optsCon.appendChild(b);
       });
     }
-
-    function handleAnswer(chosen, correct) {
-      const btns = optionsContainer.querySelectorAll(".option-btn");
+    function answerQ(chosen, correct) {
+      const btns = optsCon.querySelectorAll(".opt-btn");
       btns.forEach(b => b.disabled = true);
-
       if (chosen === correct) {
         btns[chosen].classList.add("correct");
-        feedback.style.color = "#28a745";
-        feedback.textContent = "Correct! 🎉";
-        burstConfetti();
-        nextBtn.style.display = "inline-block";
+        qFb.style.color = "#28a745"; qFb.textContent = "Correct! 🎉";
+        burst();
+        qNext.style.display = "inline-block";
+        qNext.textContent = curQ + 1 < qs.length ? "Next ➡️" : "Oyuna Geç 🃏";
       } else {
-        btns[chosen].classList.add("wrong");
-        btns[correct].classList.add("correct");
-        feedback.style.color = "#dc3545";
-        feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
-        setTimeout(() => {
-          btns.forEach(b => { b.disabled = false; b.classList.remove("wrong","correct"); });
-          feedback.textContent = "";
-        }, 1400);
+        btns[chosen].classList.add("wrong"); btns[correct].classList.add("correct");
+        qFb.style.color = "#dc3545"; qFb.textContent = wrongs[Math.floor(Math.random() * wrongs.length)];
+        setTimeout(() => { btns.forEach(b => { b.disabled = false; b.classList.remove("wrong","correct"); }); qFb.textContent = ""; }, 1400);
       }
     }
-
-    nextBtn.addEventListener("click", () => {
-      current++;
-      if (current < questions.length) {
-        loadQuestion(current);
-      } else {
-        quizScreen.style.display = "none";
-        finalScreen.style.display = "block";
-        resizeCanvas();
-        finalConfetti();
-      }
+    qNext.addEventListener("click", () => {
+      curQ++;
+      if (curQ < qs.length) loadQ(curQ);
+      else { show("memoryScreen"); initMemory(); }
     });
+
+    /* ── 5. MEMORY GAME ── */
+    const emojis = ["🍮","🐘","🐻","🍀","🍕"];
+    let flipped = [], matched = 0, canFlip = true;
+
+    function initMemory() {
+      flipped = []; matched = 0; canFlip = true;
+      document.getElementById("memPairs").textContent = "5 çift kaldı";
+      document.getElementById("memNext").style.display = "none";
+      const pairs = [...emojis, ...emojis];
+      for (let i = pairs.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [pairs[i], pairs[j]] = [pairs[j], pairs[i]]; }
+      const grid = document.getElementById("memGrid");
+      grid.innerHTML = "";
+      pairs.forEach((e, i) => {
+        const c = document.createElement("div");
+        c.className = "mem-card"; c.dataset.e = e; c.dataset.i = i;
+        c.innerHTML = `<div class="mem-card-inner"><div class="mem-front">?</div><div class="mem-back">${e}</div></div>`;
+        c.addEventListener("click", () => flipMem(c));
+        grid.appendChild(c);
+      });
+    }
+    function flipMem(card) {
+      if (!canFlip || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+      if (flipped.length >= 2) return;
+      card.classList.add("flipped"); flipped.push(card);
+      if (flipped.length === 2) { canFlip = false; setTimeout(checkMem, 800); }
+    }
+    function checkMem() {
+      const [a, b] = flipped;
+      if (a.dataset.e === b.dataset.e) {
+        a.classList.add("matched"); b.classList.add("matched");
+        matched++; burst();
+        const left = emojis.length - matched;
+        document.getElementById("memPairs").textContent = left === 0 ? "🎉 Hepsini buldun!" : `${left} çift kaldı`;
+        if (matched === emojis.length) setTimeout(() => { bigBurst(); document.getElementById("memNext").style.display = "inline-block"; }, 500);
+      } else { a.classList.remove("flipped"); b.classList.remove("flipped"); }
+      flipped = []; canFlip = true;
+    }
+    document.getElementById("memNext").addEventListener("click", () => show("letterScreen"));
+
+    /* ── 6. LETTER ── */
+    const envWrap = document.getElementById("envWrap");
+    const letterContent = document.getElementById("letterContent");
+    const envHint = document.getElementById("envHint");
+    envWrap.addEventListener("click", () => {
+      if (envWrap.classList.contains("open")) return;
+      envWrap.classList.add("open");
+      envHint.style.display = "none";
+      setTimeout(() => { letterContent.style.display = "block"; burst(); }, 500);
+    });
+    document.getElementById("letterNext").addEventListener("click", () => { show("finalScreen"); bigBurst(); });
   </script>
 </body>
 </html>
