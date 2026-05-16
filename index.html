@@ -6,24 +6,6 @@
   <title>Barış & Polen 💕</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
-    .music-btn {
-      position: fixed;
-      bottom: 20px; right: 20px;
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: var(--pink);
-      color: #fff;
-      font-size: 20px;
-      border: none; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(255,59,122,.4);
-      z-index: 1000;
-      display: none;
-      align-items: center; justify-content: center;
-      transition: transform .15s, background .15s;
-    }
-    .music-btn:hover { background: var(--pink-hover); transform: scale(1.1); }
-  </style>
-  <style>
     :root {
       --pink: #ff3b7a;
       --pink-hover: #ff1f68;
@@ -361,7 +343,6 @@
   <canvas id="confettiCanvas"></canvas>
 
   <!-- Music toggle button -->
-  <button class="music-btn" id="musicBtn" title="Müziği aç/kapat">🎵</button>
 
   <!-- ════ 1. LOADING ════ -->
   <div class="screen active" id="loadingScreen">
@@ -571,33 +552,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     setTimeout(animLoad, 500);
 
     /* ── 2. LANDING ── */
-    /* ── MUSIC ── */
-    const musicBtn = document.getElementById("musicBtn");
-    let audio = null;
-    let musicOn = false;
-
-    function startMusic() {
-      try {
-        if (!audio) {
-          audio = new Audio("https://audio.jukehost.co.uk/xvnSKAuqGMlCPVbpOILmFzYFuBmJJbGL");
-          audio.loop = true;
-          audio.volume = 0.4;
-        }
-        audio.play().catch(() => {});
-        musicOn = true;
-        musicBtn.style.display = "flex";
-        musicBtn.textContent = "🎵";
-      } catch(e) {}
-    }
-
-    musicBtn.addEventListener("click", () => {
-      if (!audio) return;
-      musicOn = !musicOn;
-      if (musicOn) { audio.play().catch(() => {}); musicBtn.textContent = "🎵"; }
-      else          { audio.pause(); musicBtn.textContent = "🔇"; }
-    });
-
-    document.getElementById("startBtn").addEventListener("click", () => { startMusic(); show("valentineScreen"); });
+    document.getElementById("startBtn").addEventListener("click", () => { show("valentineScreen"); });
 
     /* ── 3. VALENTINE ── */
     const zone   = document.getElementById("zone");
