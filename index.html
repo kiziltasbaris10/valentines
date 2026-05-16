@@ -336,6 +336,35 @@
       margin: 0 auto; display: block;
       border-radius: 14px;
     }
+
+    /* ── POPUP ── */
+    .popup-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 5000;
+      align-items: center; justify-content: center;
+    }
+    .popup-overlay.show { display: flex; }
+    .popup-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 36px 32px 28px;
+      text-align: center;
+      max-width: min(360px, 88vw);
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
+      animation: pop .35s ease;
+    }
+    .popup-emoji { font-size: 64px; display: block; margin-bottom: 10px; animation: bounce 1s ease infinite; }
+    .popup-title { font-size: 28px; font-weight: 900; color: var(--pink); margin-bottom: 8px; }
+    .popup-text  { font-size: 15px; color: #444; line-height: 1.7; margin-bottom: 22px; }
+    .popup-btn   {
+      background: var(--pink); color: #fff;
+      border: none; border-radius: 999px;
+      padding: 13px 34px; font-size: 15px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 8px 20px rgba(255,59,122,.3);
+    }
+    .popup-btn:hover { background: var(--pink-hover); }
   </style>
 </head>
 
@@ -517,6 +546,20 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
         <br>
         <button class="btn-pink" id="letterNext" style="margin-top:14px">Son Sürpriz ✨</button>
       </div>
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div class="popup-overlay" id="bidikPopup">
+    <div class="popup-box">
+      <span class="popup-emoji">🧠</span>
+      <div class="popup-title">AKILLI BİDİK!</div>
+      <div class="popup-text">
+        Tüm çiftleri buldun!<br>
+        Barış çok gurur duyuyor. 🥹<br><br>
+        <strong>Seni seviyorum akıllı bidik! 🐘🐻</strong>
+      </div>
+      <button class="popup-btn" id="bidikClose">Devam Et 💌</button>
     </div>
   </div>
 
@@ -702,24 +745,26 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     });
 
     /* ── 5. MEMORY GAME ── */
-    const emojis = ["🍮","🐘","🐻","🍀","🍕"];
-    let flipped = [], matched = 0, canFlip = true;
+    var emojis = ["🐘","🐻","🍀","🍓","🥔"];
+    var flipped = [], matched = 0, canFlip = true;
 
     function initMemory() {
       flipped = []; matched = 0; canFlip = true;
       document.getElementById("memPairs").textContent = "5 çift kaldı";
       document.getElementById("memNext").style.display = "none";
-      const pairs = [...emojis, ...emojis];
-      for (let i = pairs.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [pairs[i], pairs[j]] = [pairs[j], pairs[i]]; }
-      const grid = document.getElementById("memGrid");
+      var pairs = emojis.concat(emojis);
+      for (var i = pairs.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i+1)); var tmp = pairs[i]; pairs[i] = pairs[j]; pairs[j] = tmp; }
+      var grid = document.getElementById("memGrid");
       grid.innerHTML = "";
-      pairs.forEach((e, i) => {
-        const c = document.createElement("div");
-        c.className = "mem-card"; c.dataset.e = e; c.dataset.i = i;
-        c.innerHTML = `<div class="mem-card-inner"><div class="mem-front">?</div><div class="mem-back">${e}</div></div>`;
-        c.addEventListener("click", () => flipMem(c));
-        grid.appendChild(c);
-      });
+      for (var k = 0; k < pairs.length; k++) {
+        (function(e, idx) {
+          var c = document.createElement("div");
+          c.className = "mem-card"; c.dataset.e = e; c.dataset.i = idx;
+          c.innerHTML = "<div class='mem-card-inner'><div class='mem-front'>?</div><div class='mem-back'>" + e + "</div></div>";
+          c.addEventListener("click", function() { flipMem(c); });
+          grid.appendChild(c);
+        })(pairs[k], k);
+      }
     }
     function flipMem(card) {
       if (!canFlip || card.classList.contains("flipped") || card.classList.contains("matched")) return;
@@ -728,17 +773,23 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       if (flipped.length === 2) { canFlip = false; setTimeout(checkMem, 800); }
     }
     function checkMem() {
-      const [a, b] = flipped;
+      var a = flipped[0], b = flipped[1];
       if (a.dataset.e === b.dataset.e) {
         a.classList.add("matched"); b.classList.add("matched");
         matched++; burst();
-        const left = emojis.length - matched;
-        document.getElementById("memPairs").textContent = left === 0 ? "🎉 Hepsini buldun!" : `${left} çift kaldı`;
-        if (matched === emojis.length) setTimeout(() => { bigBurst(); document.getElementById("memNext").style.display = "inline-block"; }, 500);
+        var left = emojis.length - matched;
+        document.getElementById("memPairs").textContent = left === 0 ? "Hepsini buldun!" : left + " çift kaldı";
+        if (matched === emojis.length) {
+          setTimeout(function() { bigBurst(); document.getElementById("bidikPopup").classList.add("show"); }, 600);
+        }
       } else { a.classList.remove("flipped"); b.classList.remove("flipped"); }
       flipped = []; canFlip = true;
     }
-    document.getElementById("memNext").addEventListener("click", () => show("letterScreen"));
+    document.getElementById("bidikClose").addEventListener("click", function() {
+      document.getElementById("bidikPopup").classList.remove("show");
+      document.getElementById("memNext").style.display = "inline-block";
+    });
+    document.getElementById("memNext").addEventListener("click", function() { show("letterScreen"); });
 
     /* ── 6. LETTER ── */
     const envWrap = document.getElementById("envWrap");
