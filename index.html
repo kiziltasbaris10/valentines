@@ -576,62 +576,84 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       if (Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY) < 140) moveNo(e.clientX, e.clientY);
     });
     noBtn.addEventListener("click", e => e.preventDefault());
-    yesBtn.addEventListener("click", () => { burst(); curQ = 0; show("quizScreen"); loadQ(0); });
+    yesBtn.addEventListener("click", function() {
+      burst();
+      curQ = 0;
+      show("quizScreen");
+      setTimeout(function() { loadQ(0); }, 80);
+    });
 
     /* ── 4. QUIZ ── */
-    const qs = [
-      { q: "When did Barış first message you?",                              opts: ["November 5","December 31","October 31","September 19"], a: 2 },
-      { q: "When did Barış first send you flowers?",                         opts: ["December 25","November 20","October 30","January 23"],  a: 1 },
-      { q: "What was the first meal you and Barış ate together?",            opts: ["Iskender","Sushi","Doner","Pide"],                       a: 2 },
-      { q: "Where did we first meet?",                                       opts: ["At school","At a café","At a bar","On social media"],    a: 0 },
-      { q: "What does Barış love most about Polen?",                         opts: ["Her beauty","Her vision in life","Her intelligence","All of them"], a: 3 },
-      { q: "What was the final score of the air hockey game Polen won in Milan?", opts: ["Polen won 5–1","Polen won 5–2","Polen won 5–3","Polen won 5–4"], a: 3 },
+    var qs = [
+      { q: "When did Baris first message you?",                              opts: ["November 5","December 31","October 31","September 19"], a: 2 },
+      { q: "When did Baris first send you flowers?",                         opts: ["December 25","November 20","October 30","January 23"],  a: 1 },
+      { q: "What was the first meal you and Baris ate together?",            opts: ["Iskender","Sushi","Doner","Pide"],                       a: 2 },
+      { q: "Where did we first meet?",                                       opts: ["At school","At a cafe","At a bar","On social media"],    a: 0 },
+      { q: "What does Baris love most about Polen?",                         opts: ["Her beauty","Her vision in life","Her intelligence","All of them"], a: 3 },
+      { q: "What was the final score of the air hockey game Polen won in Milan?", opts: ["Polen won 5-1","Polen won 5-2","Polen won 5-3","Polen won 5-4"], a: 3 },
       { q: "What McDonald's menu did they eat on Valentine's Day?",           opts: ["Big Mac Menu","Whopper Menu","Chicken Burger Menu"],     a: 0 },
-      { q: "Who is the person Barış wishes he had met most in your life?",   opts: ["Emel Mommy","Mert Reis","Pamir","Grandma Fadik"],        a: 3 },
-      { q: "What is Barış's favorite food?",                                 opts: ["Fresh green beans","Manti","Pizza","Lahmacun"],          a: 0 },
-      { q: "Which terminal did Barış wait for Polen at Malpensa Airport?",   opts: ["Terminal 5","Terminal 7","Terminal 9","Terminal 1"],     a: 1 },
+      { q: "Who is the person Baris wishes he had met most in your life?",   opts: ["Emel Mommy","Mert Reis","Pamir","Grandma Fadik"],        a: 3 },
+      { q: "What is Baris's favorite food?",                                 opts: ["Fresh green beans","Manti","Pizza","Lahmacun"],          a: 0 },
+      { q: "Which terminal did Baris wait for Polen at Malpensa Airport?",   opts: ["Terminal 5","Terminal 7","Terminal 9","Terminal 1"],     a: 1 },
     ];
-    const wrongs = ["Hmmm, are you sure? 🤔","Not quite! Try again 😏","I don't think so... 😄","Nope! Give it another shot 💭","Hmm, that's not right 😈","Think again! 🙈"];
-    const pFill   = document.getElementById("progressFill");
-    const qCount  = document.getElementById("qCount");
-    const qText   = document.getElementById("qText");
-    const optsCon = document.getElementById("options");
-    const qFb     = document.getElementById("quizFeedback");
-    const qNext   = document.getElementById("quizNext");
-    let curQ = 0;
+    var wrongs = ["Hmmm, are you sure?","Not quite! Try again","I don't think so...","Nope! Give it another shot","Think again!"];
+    var curQ = 0;
 
     function loadQ(idx) {
-      const q = qs[idx];
-      pFill.style.width = (idx / qs.length * 100) + "%";
-      qCount.textContent = `Question ${idx + 1} / ${qs.length}`;
-      qText.textContent  = q.q;
-      qFb.textContent    = "";
-      qNext.style.display = "none";
-      optsCon.innerHTML  = "";
-      q.opts.forEach((o, i) => {
-        const b = document.createElement("button");
-        b.className = "opt-btn";
-        b.textContent = `${["A","B","C","D"][i]}) ${o}`;
-        b.addEventListener("click", () => answerQ(i, q.a));
-        optsCon.appendChild(b);
-      });
-    }
-    function answerQ(chosen, correct) {
-      const btns = optsCon.querySelectorAll(".opt-btn");
-      btns.forEach(b => b.disabled = true);
-      if (chosen === correct) {
-        btns[chosen].classList.add("correct");
-        qFb.style.color = "#28a745"; qFb.textContent = "Correct! 🎉";
-        burst();
-        qNext.style.display = "inline-block";
-        qNext.textContent = curQ + 1 < qs.length ? "Next ➡️" : "Oyuna Geç 🃏";
-      } else {
-        btns[chosen].classList.add("wrong"); btns[correct].classList.add("correct");
-        qFb.style.color = "#dc3545"; qFb.textContent = wrongs[Math.floor(Math.random() * wrongs.length)];
-        setTimeout(() => { btns.forEach(b => { b.disabled = false; b.classList.remove("wrong","correct"); }); qFb.textContent = ""; }, 1400);
+      var q = qs[idx];
+      if (!q) return;
+      var pf = document.getElementById("progressFill");
+      var qc = document.getElementById("qCount");
+      var qt = document.getElementById("qText");
+      var oc = document.getElementById("options");
+      var fb = document.getElementById("quizFeedback");
+      var qn = document.getElementById("quizNext");
+      if (!pf || !qc || !qt || !oc || !fb || !qn) return;
+      pf.style.width = (idx / qs.length * 100) + "%";
+      qc.textContent = "Question " + (idx + 1) + " / " + qs.length;
+      qt.textContent = q.q;
+      fb.textContent = "";
+      qn.style.display = "none";
+      oc.innerHTML = "";
+      var labels = ["A","B","C","D"];
+      for (var i = 0; i < q.opts.length; i++) {
+        (function(optIndex) {
+          var b = document.createElement("button");
+          b.className = "opt-btn";
+          b.textContent = labels[optIndex] + ") " + q.opts[optIndex];
+          b.onclick = function() { answerQ(optIndex, q.a); };
+          oc.appendChild(b);
+        })(i);
       }
     }
-    qNext.addEventListener("click", () => {
+    function answerQ(chosen, correct) {
+      var oc = document.getElementById("options");
+      var fb = document.getElementById("quizFeedback");
+      var qn = document.getElementById("quizNext");
+      if (!oc || !fb || !qn) return;
+      var btns = oc.querySelectorAll(".opt-btn");
+      for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+      if (chosen === correct) {
+        btns[chosen].classList.add("correct");
+        fb.style.color = "#28a745"; fb.textContent = "Correct!";
+        burst();
+        qn.style.display = "inline-block";
+        qn.textContent = (curQ + 1 < qs.length) ? "Next" : "Oyuna Gec";
+      } else {
+        btns[chosen].classList.add("wrong");
+        btns[correct].classList.add("correct");
+        fb.style.color = "#dc3545";
+        fb.textContent = wrongs[Math.floor(Math.random() * wrongs.length)];
+        setTimeout(function() {
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].disabled = false;
+            btns[i].classList.remove("wrong","correct");
+          }
+          fb.textContent = "";
+        }, 1400);
+      }
+    }
+    document.getElementById("quizNext").addEventListener("click", function() {
       curQ++;
       if (curQ < qs.length) loadQ(curQ);
       else { show("memoryScreen"); initMemory(); }
