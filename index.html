@@ -329,13 +329,38 @@
     /* ════════════════════════════
        7. FINAL SCREEN
     ════════════════════════════ */
-    .final-h2 { font-size: clamp(26px, 5vw, 44px); margin: 14px 0 8px; }
-    .final-p  { font-size: 16px; opacity: .7; margin-bottom: 18px; }
-    .fireworks {
-      width: min(320px, 88vw);
-      margin: 0 auto; display: block;
-      border-radius: 14px;
+    .final-h2 {
+      font-size: clamp(28px, 5vw, 48px);
+      margin: 10px 0 14px;
+      background: linear-gradient(135deg, var(--pink), #ff9a3c, var(--pink));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 2.5s linear infinite;
     }
+    @keyframes shimmer { to { background-position: 200% center; } }
+
+    .hearts-wrap {
+      position: relative;
+      height: 80px;
+      overflow: hidden;
+      margin: 0 auto 10px;
+    }
+    .floating-heart {
+      position: absolute;
+      bottom: -10px;
+      font-size: 26px;
+      animation: floatUp 3s ease-in infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) scale(1);   opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(-90px) scale(1.3); opacity: 0; }
+    }
+    .final-emojis { font-size: 44px; margin: 8px 0 6px; letter-spacing: 6px; animation: bounce 1.2s ease infinite; }
+    .final-sub { font-size: 15px; color: #888; margin-top: 10px; }
 
     /* ── POPUP ── */
     .popup-overlay {
@@ -556,8 +581,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       <div class="popup-title">AKILLI BİDİK!</div>
       <div class="popup-text">
         Tüm çiftleri buldun!<br>
-        Barış çok gurur duyuyor. 🥹<br><br>
-        <strong>Seni seviyorum akıllı bidik! 🐘🐻</strong>
+        Barış çok gurur duyuyor. 🥹
       </div>
       <button class="popup-btn" id="bidikClose">Devam Et 💌</button>
     </div>
@@ -566,9 +590,10 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
   <!-- ════ 7. FINAL ════ -->
   <div class="screen" id="finalScreen">
     <div class="card">
-      <h2 class="final-h2">Seni çok seviyorum Polen! 💞</h2>
-      <p class="final-p">Barış seninle her saniyeye değer 🐘❤️</p>
-      <img class="fireworks" src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" alt="Fireworks"/>
+      <div class="hearts-wrap" id="heartsWrap"></div>
+      <div class="final-emojis">🐘🐻💕</div>
+      <h2 class="final-h2">Seni çok seviyorum Polen!</h2>
+      <div class="final-sub">— Barış 🍁</div>
     </div>
   </div>
 
@@ -801,7 +826,51 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       envHint.style.display = "none";
       setTimeout(() => { letterContent.style.display = "block"; burst(); }, 500);
     });
-    document.getElementById("letterNext").addEventListener("click", () => { show("finalScreen"); bigBurst(); });
+    var finalConfettiTimer = null;
+    function startFinalCelebration() {
+      bigBurst();
+      var heartsWrap = document.getElementById("heartsWrap");
+      var heartEmojis = ["💕","💖","💗","💓","🩷","❤️","💞"];
+      function spawnHeart() {
+        if (!document.getElementById("finalScreen").classList.contains("active")) return;
+        var h = document.createElement("span");
+        h.className = "floating-heart";
+        h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        h.style.left = (5 + Math.random() * 90) + "%";
+        h.style.animationDuration = (2 + Math.random() * 2) + "s";
+        h.style.animationDelay = "0s";
+        heartsWrap.appendChild(h);
+        setTimeout(function() { if (h.parentNode) h.parentNode.removeChild(h); }, 4000);
+      }
+      var heartTimer = setInterval(function() {
+        if (!document.getElementById("finalScreen").classList.contains("active")) { clearInterval(heartTimer); return; }
+        spawnHeart();
+      }, 400);
+
+      var colors = ["#ff3b7a","#ff9a3c","#ffd700","#ff6b9d","#c084fc","#67e8f9"];
+      var step = 0;
+      function launchConfetti() {
+        if (!document.getElementById("finalScreen").classList.contains("active")) { clearTimeout(finalConfettiTimer); return; }
+        step++;
+        if (step % 3 === 0) {
+          try {
+            ci({ particleCount: 18, angle: 60,  spread: 55, origin: { x: 0,   y: 0.65 }, colors: colors, startVelocity: 50, ticks: 200 });
+            ci({ particleCount: 18, angle: 120, spread: 55, origin: { x: 1,   y: 0.65 }, colors: colors, startVelocity: 50, ticks: 200 });
+          } catch(e) {}
+        } else {
+          try {
+            ci({ particleCount: 12, spread: 80, origin: { x: Math.random(), y: 0.3 }, colors: colors, startVelocity: 40, ticks: 180 });
+          } catch(e) {}
+        }
+        finalConfettiTimer = setTimeout(launchConfetti, 700);
+      }
+      launchConfetti();
+    }
+
+    document.getElementById("letterNext").addEventListener("click", function() {
+      show("finalScreen");
+      startFinalCelebration();
+    });
   </script>
 </body>
 </html>
