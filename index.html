@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Will you be my Valentine?</title>
-
-  <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
   <style>
     :root {
       --bg1: #ffd6e7;
@@ -17,20 +14,17 @@
       --yesHover: #ff1f68;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
       min-height: 100svh;
       display: grid;
       place-items: center;
       background: radial-gradient(circle at top, var(--bg2), var(--bg1));
       font-family: system-ui, sans-serif;
-      overflow: hidden;
       padding: 16px;
     }
 
-    /* FULL-SCREEN CONFETTI CANVAS */
     #confettiCanvas {
       position: fixed;
       inset: 0;
@@ -50,6 +44,7 @@
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
     }
 
+    /* ── VALENTINE SCREEN ── */
     .art {
       width: min(260px, 80vw);
       margin: 0 auto 10px;
@@ -58,7 +53,7 @@
     }
 
     h1 {
-      font-size: clamp(26px, 4vw, 44px);
+      font-size: clamp(22px, 4vw, 40px);
       margin: 12px 0 18px;
     }
 
@@ -86,45 +81,110 @@
       transition: transform .12s ease, background .12s ease;
     }
 
-    #yesBtn {
-      left: 18%;
+    #yesBtn { left: 18%; background: var(--yes); color: #fff; }
+    #yesBtn:hover { background: var(--yesHover); }
+    #noBtn  { left: 62%; background: #e5e7eb; color: #111827; }
+
+    .hint { margin-top: 10px; font-size: 13px; opacity: .7; }
+
+    /* ── QUIZ SCREEN ── */
+    #quizScreen { display: none; }
+
+    .progress-bar-wrap {
+      background: #ffd6e7;
+      border-radius: 99px;
+      height: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--yes);
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+
+    .question-count {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: clamp(17px, 3vw, 24px);
+      font-weight: 700;
+      margin-bottom: 22px;
+      line-height: 1.35;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-btn {
+      position: static;
+      top: unset;
+      transform: none;
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 14px;
+      border: 2.5px solid #ffd6e7;
+      background: #fff;
+      color: #222;
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s, border-color .15s, transform .1s;
+      box-shadow: 0 4px 12px rgba(0,0,0,.07);
+    }
+    .option-btn:hover { background: #fff0f6; border-color: var(--yes); transform: translateY(-2px); }
+    .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+    .option-btn.wrong   { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    .option-btn:disabled { cursor: default; transform: none; }
+
+    .feedback {
+      margin-top: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      min-height: 24px;
+      color: #dc3545;
+      animation: pop .25s ease;
+    }
+
+    .next-btn {
+      position: static;
+      top: unset;
+      transform: none;
+      margin-top: 18px;
+      padding: 14px 36px;
       background: var(--yes);
       color: #fff;
-    }
-    #yesBtn:hover { background: var(--yesHover); }
-
-    #noBtn {
-      left: 62%;
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .hint {
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: .7;
-    }
-
-    .result {
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
       display: none;
-      margin-top: 18px;
-      animation: pop .35s ease;
+      box-shadow: 0 8px 20px rgba(255,59,122,.3);
     }
+    .next-btn:hover { background: var(--yesHover); }
 
-    .result h2 {
-      font-size: clamp(30px, 4.5vw, 46px);
-      margin: 10px 0;
-    }
-
+    /* ── FINAL SCREEN ── */
+    #finalScreen { display: none; }
+    #finalScreen h2 { font-size: clamp(28px, 5vw, 48px); margin: 16px 0 8px; }
+    #finalScreen p  { font-size: 17px; opacity: .75; margin-bottom: 16px; }
     .fireworks {
-      width: min(380px, 90vw);
+      width: min(340px, 90vw);
       margin: 0 auto;
       display: block;
+      border-radius: 16px;
     }
 
     @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      from { transform: scale(.9); opacity: 0; }
+      to   { transform: scale(1);  opacity: 1; }
     }
   </style>
 </head>
@@ -133,199 +193,270 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <!-- ELEPHANT WITH HEART -->
-    <svg class="art" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="elBody" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#b0bec5"/>
-          <stop offset="1" stop-color="#78909c"/>
-        </linearGradient>
-        <linearGradient id="elLight" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#cfd8dc"/>
-          <stop offset="1" stop-color="#b0bec5"/>
-        </linearGradient>
-        <linearGradient id="heart" x1="0" x2="1">
-          <stop offset="0" stop-color="#ff4d7d"/>
-          <stop offset="1" stop-color="#ff1f68"/>
-        </linearGradient>
-      </defs>
 
-      <!-- Body -->
-      <ellipse cx="160" cy="185" rx="88" ry="68" fill="url(#elBody)"/>
+    <!-- ═══════════ VALENTINE SCREEN ═══════════ -->
+    <div id="valentineScreen">
+      <svg class="art" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="elBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#b0bec5"/><stop offset="1" stop-color="#78909c"/>
+          </linearGradient>
+          <linearGradient id="elLight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#cfd8dc"/><stop offset="1" stop-color="#b0bec5"/>
+          </linearGradient>
+          <linearGradient id="heart" x1="0" x2="1">
+            <stop offset="0" stop-color="#ff4d7d"/><stop offset="1" stop-color="#ff1f68"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="160" cy="185" rx="88" ry="68" fill="url(#elBody)"/>
+        <ellipse cx="160" cy="115" rx="72" ry="65" fill="url(#elBody)"/>
+        <ellipse cx="98"  cy="110" rx="30" ry="38" fill="url(#elLight)"/>
+        <ellipse cx="101" cy="112" rx="18" ry="25" fill="#ffcdd2"/>
+        <ellipse cx="222" cy="110" rx="30" ry="38" fill="url(#elLight)"/>
+        <ellipse cx="219" cy="112" rx="18" ry="25" fill="#ffcdd2"/>
+        <path d="M148 158 C140 170 130 185 128 205 C126 218 132 228 140 228 C148 228 152 218 150 205 C148 192 155 178 160 165Z" fill="url(#elBody)"/>
+        <rect x="108" y="238" width="34" height="22" rx="10" fill="url(#elBody)"/>
+        <rect x="178" y="238" width="34" height="22" rx="10" fill="url(#elBody)"/>
+        <rect x="96"  y="230" width="34" height="22" rx="10" fill="url(#elBody)"/>
+        <rect x="190" y="230" width="34" height="22" rx="10" fill="url(#elBody)"/>
+        <circle cx="138" cy="105" r="10" fill="white"/>
+        <circle cx="182" cy="105" r="10" fill="white"/>
+        <circle cx="140" cy="106" r="6"  fill="#37474f"/>
+        <circle cx="184" cy="106" r="6"  fill="#37474f"/>
+        <circle cx="141" cy="104" r="2"  fill="white"/>
+        <circle cx="185" cy="104" r="2"  fill="white"/>
+        <path d="M148 135 Q160 145 172 135" stroke="#546e7a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="122" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
+        <ellipse cx="198" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
+        <path d="M118 208 C118 197 130 192 136 200 C142 192 154 197 154 208 C154 222 136 232 136 238 C136 232 118 222 118 208Z" fill="url(#heart)"/>
+        <path d="M246 175 C260 168 268 155 264 148" stroke="#78909c" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="264" cy="146" r="5" fill="#b0bec5"/>
+      </svg>
 
-      <!-- Head -->
-      <ellipse cx="160" cy="115" rx="72" ry="65" fill="url(#elBody)"/>
+      <h1>Polen, will you be my valentine? 💕</h1>
 
-      <!-- Left ear -->
-      <ellipse cx="98" cy="110" rx="30" ry="38" fill="url(#elLight)"/>
-      <ellipse cx="101" cy="112" rx="18" ry="25" fill="#ffcdd2"/>
+      <section class="button-zone" id="zone">
+        <button id="yesBtn">Yes 💖</button>
+        <button id="noBtn">No</button>
+      </section>
+      <div class="hint" id="hint">"No" seems a bit shy 😈</div>
+    </div>
 
-      <!-- Right ear -->
-      <ellipse cx="222" cy="110" rx="30" ry="38" fill="url(#elLight)"/>
-      <ellipse cx="219" cy="112" rx="18" ry="25" fill="#ffcdd2"/>
+    <!-- ═══════════ QUIZ SCREEN ═══════════ -->
+    <div id="quizScreen">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="question-count" id="questionCount">Question 1 / 10</div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn">Next ➡️</button>
+    </div>
 
-      <!-- Trunk -->
-      <path d="M148 158 C140 170 130 185 128 205 C126 218 132 228 140 228 C148 228 152 218 150 205 C148 192 155 178 160 165Z"
-            fill="url(#elBody)"/>
+    <!-- ═══════════ FINAL SCREEN ═══════════ -->
+    <div id="finalScreen">
+      <h2>You two know each other perfectly! 💞</h2>
+      <p>Barış loves you so much, Polen 🐘❤️</p>
+      <img class="fireworks" src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" alt="Fireworks"/>
+    </div>
 
-      <!-- Legs -->
-      <rect x="108" y="238" width="34" height="22" rx="10" fill="url(#elBody)"/>
-      <rect x="178" y="238" width="34" height="22" rx="10" fill="url(#elBody)"/>
-      <rect x="96"  y="230" width="34" height="22" rx="10" fill="url(#elBody)"/>
-      <rect x="190" y="230" width="34" height="22" rx="10" fill="url(#elBody)"/>
-
-      <!-- Eyes -->
-      <circle cx="138" cy="105" r="10" fill="white"/>
-      <circle cx="182" cy="105" r="10" fill="white"/>
-      <circle cx="140" cy="106" r="6" fill="#37474f"/>
-      <circle cx="184" cy="106" r="6" fill="#37474f"/>
-      <circle cx="141" cy="104" r="2" fill="white"/>
-      <circle cx="185" cy="104" r="2" fill="white"/>
-
-      <!-- Smile -->
-      <path d="M148 135 Q160 145 172 135" stroke="#546e7a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-
-      <!-- Blush -->
-      <ellipse cx="122" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
-      <ellipse cx="198" cy="125" rx="12" ry="7" fill="#ff8a9a" opacity="0.5"/>
-
-      <!-- Heart held by trunk tip -->
-      <path d="M118 208 C118 197 130 192 136 200
-               C142 192 154 197 154 208
-               C154 222 136 232 136 238
-               C136 232 118 222 118 208Z"
-            fill="url(#heart)"/>
-
-      <!-- Tail -->
-      <path d="M246 175 C260 168 268 155 264 148" stroke="#78909c" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <circle cx="264" cy="146" r="5" fill="#b0bec5"/>
-    </svg>
-
-    <h1>polen will you be my valentine?</h1>
-
-    <section class="button-zone" id="zone">
-      <button id="yesBtn">Yes</button>
-      <button id="noBtn">No</button>
-    </section>
-
-    <!-- HINT -->
-    <div class="hint" id="hint">"No" seems a bit shy 😈</div>
-
-    <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
-      <img
-        class="fireworks"
-        src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
-        alt="Fireworks"
-      />
-    </section>
   </main>
 
   <script>
-    const zone = document.getElementById("zone");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn = document.getElementById("noBtn");
-    const result = document.getElementById("result");
-    const hint = document.getElementById("hint");
+    /* ── QUESTIONS ── */
+    const questions = [
+      {
+        q: "Barış sana ilk mesajı ne zaman attı?",
+        options: ["November 5", "December 31", "October 31", "September 19"],
+        answer: 2
+      },
+      {
+        q: "Barış sana ilk ne zaman çiçek gönderdi?",
+        options: ["December 25", "November 20", "October 30", "January 23"],
+        answer: 1
+      },
+      {
+        q: "Barış'la beraber yediğiniz ilk yemek neydi?",
+        options: ["İskender", "Sushi", "Döner", "Pide"],
+        answer: 2
+      },
+      {
+        q: "İlk nerede tanıştınız?",
+        options: ["Okulda", "Kafede", "Barda", "Sosyal medyada"],
+        answer: 0
+      },
+      {
+        q: "Barış Polen'in en çok hangi özelliğini seviyordur?",
+        options: ["Güzellik", "Hayat vizyonu", "Zeka", "Hepsi"],
+        answer: 3
+      },
+      {
+        q: "Milano'da oynadıkları masa hokeyini Polen kaç kaç yenmiştir?",
+        options: ["Polen 5-1", "Polen 5-2", "Polen 5-3", "Polen 5-4"],
+        answer: 0
+      },
+      {
+        q: "Sevgililer günü yedikleri McDonald's menüsü neydi?",
+        options: ["Big Mac Menü", "Whopper Menü", "Chicken Burger Menü"],
+        answer: 0
+      },
+      {
+        q: "Barış'ın Polen'in hayatında en çok tanışmadığı kişi kimdir?",
+        options: ["Emel Mommy", "Mert Reis", "Pamir", "Fadik Anneanne"],
+        answer: 3
+      },
+      {
+        q: "Barış'ın en sevdiği yemek nedir?",
+        options: ["Taze yeşil fasulye", "Mantı", "Pizza", "Lahmacun"],
+        answer: 0
+      },
+      {
+        q: "Barış Polen'i Malpensa Havalimanı'nda kaç numaralı terminalde beklemiştir?",
+        options: ["5", "7", "9", "1"],
+        answer: 1
+      }
+    ];
 
-    /* ---------- CONFETTI ---------- */
-    const confettiCanvas = document.getElementById("confettiCanvas");
+    const wrongMessages = [
+      "Hmmm, emin misin? 🤔",
+      "Yanlış! Bir daha dene 😏",
+      "Sanmıyorum... 😄",
+      "Olmadı! Tekrar dene 💭",
+      "Hmm, bu doğru değil 😈",
+      "Bir daha düşün! 🙈"
+    ];
 
-    function resizeConfettiCanvas() {
+    /* ── DOM ── */
+    const valentineScreen = document.getElementById("valentineScreen");
+    const quizScreen      = document.getElementById("quizScreen");
+    const finalScreen     = document.getElementById("finalScreen");
+    const zone            = document.getElementById("zone");
+    const yesBtn          = document.getElementById("yesBtn");
+    const noBtn           = document.getElementById("noBtn");
+    const hint            = document.getElementById("hint");
+    const progressFill    = document.getElementById("progressFill");
+    const questionCount   = document.getElementById("questionCount");
+    const questionText    = document.getElementById("questionText");
+    const optionsContainer= document.getElementById("optionsContainer");
+    const feedback        = document.getElementById("feedback");
+    const nextBtn         = document.getElementById("nextBtn");
+    const confettiCanvas  = document.getElementById("confettiCanvas");
+
+    /* ── CONFETTI ── */
+    function resizeCanvas() {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
+      confettiCanvas.width  = Math.floor(window.innerWidth  * dpr);
       confettiCanvas.height = Math.floor(window.innerHeight * dpr);
-      confettiCanvas.style.width = "100vw";
+      confettiCanvas.style.width  = "100vw";
       confettiCanvas.style.height = "100vh";
     }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 150));
 
-    resizeConfettiCanvas();
-    window.addEventListener("resize", resizeConfettiCanvas);
-    window.addEventListener("orientationchange", () => setTimeout(resizeConfettiCanvas, 150));
+    const confettiInst = confetti.create(confettiCanvas, { resize: false, useWorker: true });
 
-    const confettiInstance = confetti.create(confettiCanvas, {
-      resize: false,
-      useWorker: true
-    });
-
-    function fullScreenConfetti() {
-      const end = Date.now() + 1600;
-
-      (function frame() {
-        confettiInstance({
-          particleCount: 12,
-          spread: 90,
-          startVelocity: 45,
-          ticks: 180,
-          origin: { x: Math.random(), y: Math.random() * 0.3 }
-        });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-
-      setTimeout(() => {
-        confettiInstance({
-          particleCount: 300,
-          spread: 140,
-          startVelocity: 60,
-          ticks: 220,
-          origin: { x: 0.5, y: 0.55 }
-        });
-      }, 300);
+    function burstConfetti() {
+      confettiInst({ particleCount: 80, spread: 100, startVelocity: 45, ticks: 180, origin: { x: 0.5, y: 0.6 } });
     }
 
-    /* ---------- YES BUTTON GROWS ---------- */
+    function finalConfetti() {
+      const end = Date.now() + 1800;
+      (function frame() {
+        confettiInst({ particleCount: 12, spread: 90, startVelocity: 45, ticks: 180, origin: { x: Math.random(), y: Math.random() * 0.3 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+      setTimeout(() => confettiInst({ particleCount: 300, spread: 140, startVelocity: 60, ticks: 220, origin: { x: 0.5, y: 0.55 } }), 400);
+    }
+
+    /* ── NO BUTTON ESCAPE ── */
     let yesScale = 1;
     function growYes() {
       yesScale = Math.min(2.2, yesScale + 0.1);
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
     }
-
-    /* ---------- NO BUTTON RUNS AWAY ---------- */
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
+    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
     function moveNo(px, py) {
       const z = zone.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
-
-      let dx = (b.left + b.width / 2) - px;
-      let dy = (b.top + b.height / 2) - py;
-      let mag = Math.hypot(dx, dy) || 1;
-      dx /= mag;
-      dy /= mag;
-
-      let newLeft = (b.left - z.left) + dx * 150;
-      let newTop  = (b.top - z.top) + dy * 150;
-
-      newLeft = clamp(newLeft, 0, z.width - b.width);
-      newTop  = clamp(newTop, 0, z.height - b.height);
-
-      noBtn.style.left = newLeft + "px";
-      noBtn.style.top = newTop + "px";
+      let dx = (b.left + b.width  / 2) - px;
+      let dy = (b.top  + b.height / 2) - py;
+      const mag = Math.hypot(dx, dy) || 1;
+      dx /= mag; dy /= mag;
+      noBtn.style.left      = clamp((b.left - z.left) + dx * 150, 0, z.width  - b.width)  + "px";
+      noBtn.style.top       = clamp((b.top  - z.top)  + dy * 150, 0, z.height - b.height) + "px";
       noBtn.style.transform = "none";
-
       growYes();
     }
-
     zone.addEventListener("pointermove", e => {
       const b = noBtn.getBoundingClientRect();
-      const d = Math.hypot(
-        (b.left + b.width / 2) - e.clientX,
-        (b.top + b.height / 2) - e.clientY
-      );
-      if (d < 140) moveNo(e.clientX, e.clientY);
+      if (Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY) < 140) moveNo(e.clientX, e.clientY);
     });
-
     noBtn.addEventListener("click", e => e.preventDefault());
 
-    /* ---------- YES CLICK ---------- */
+    /* ── YES → START QUIZ ── */
     yesBtn.addEventListener("click", () => {
-      zone.style.display = "none";
-      hint.style.display = "none";
-      result.style.display = "block";
-      resizeConfettiCanvas();
-      fullScreenConfetti();
+      valentineScreen.style.display = "none";
+      quizScreen.style.display = "block";
+      resizeCanvas();
+      burstConfetti();
+      loadQuestion(0);
+    });
+
+    /* ── QUIZ LOGIC ── */
+    let current = 0;
+
+    function loadQuestion(idx) {
+      const q = questions[idx];
+      progressFill.style.width = (idx / questions.length * 100) + "%";
+      questionCount.textContent = `Soru ${idx + 1} / ${questions.length}`;
+      questionText.textContent  = q.q;
+      feedback.textContent = "";
+      nextBtn.style.display = "none";
+
+      optionsContainer.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = `${["A","B","C","D"][i]}) ${opt}`;
+        btn.addEventListener("click", () => handleAnswer(i, q.answer));
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(chosen, correct) {
+      const btns = optionsContainer.querySelectorAll(".option-btn");
+      btns.forEach(b => b.disabled = true);
+
+      if (chosen === correct) {
+        btns[chosen].classList.add("correct");
+        feedback.style.color = "#28a745";
+        feedback.textContent = "Doğru! 🎉";
+        burstConfetti();
+        nextBtn.style.display = "inline-block";
+      } else {
+        btns[chosen].classList.add("wrong");
+        btns[correct].classList.add("correct");
+        feedback.style.color = "#dc3545";
+        feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+        setTimeout(() => {
+          btns.forEach(b => { b.disabled = false; b.classList.remove("wrong","correct"); });
+          feedback.textContent = "";
+        }, 1400);
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      current++;
+      if (current < questions.length) {
+        loadQuestion(current);
+      } else {
+        quizScreen.style.display = "none";
+        finalScreen.style.display = "block";
+        resizeCanvas();
+        finalConfetti();
+      }
     });
   </script>
 </body>
