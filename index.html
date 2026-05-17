@@ -500,10 +500,11 @@
     #storyEndScreen.active {
       display: flex !important;
       position: fixed; inset: 0;
+      background: radial-gradient(ellipse at 50% 40%, #1a0a30 0%, #050510 100%);
       align-items: center; justify-content: center;
       z-index: 20; overflow: hidden;
     }
-    #storyEndScreen .story-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: none; }
+    #storyEndScreen .story-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: transparent; }
     .story-inner { text-align: center; padding: 40px 28px; max-width: 500px; position: relative; z-index: 2; }
     .story-hearts { font-size: 28px; margin-bottom: 24px; opacity: 0; transition: opacity 1s; letter-spacing: 8px; }
     .story-hearts.vis { opacity: 1; }
