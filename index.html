@@ -1279,21 +1279,6 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       ctx.globalAlpha = 1;
     }
 
-    function drawPickupHeart(ctx, cx, cy, r) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(-Math.PI / 4);
-      ctx.fillStyle = "#ff3b7a";
-      ctx.shadowColor = "rgba(255,59,122,0.55)";
-      ctx.shadowBlur = 7;
-      ctx.beginPath();
-      ctx.rect(-r/2, -r/2, r, r);
-      ctx.arc(-r/2, -r/2, r/2, 0, Math.PI*2);
-      ctx.arc( r/2, -r/2, r/2, 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
-
     var gameRAF = null;
     function initGame() {
       if (gameRAF) { cancelAnimationFrame(gameRAF); gameRAF = null; }
@@ -1333,28 +1318,6 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       for (var i=0;i<floats.length;i++)  allPlats.push({x:floats[i].x, y:floats[i].y,w:floats[i].w,h:11});
 
       var prX = 2720, prY = GND - 38;
-
-      var hearts = [
-        {x:100,  y:GND-44},
-        {x:190,  y:GND-118},
-        {x:365,  y:GND-108},
-        {x:500,  y:GND-44},
-        {x:610,  y:GND-113},
-        {x:755,  y:GND-108},
-        {x:835,  y:GND-128},
-        {x:1005, y:GND-133},
-        {x:1110, y:GND-108},
-        {x:1350, y:GND-44},
-        {x:1460, y:GND-113},
-        {x:1585, y:GND-133},
-        {x:1925, y:GND-113},
-        {x:2420, y:GND-113},
-        {x:2680, y:GND-44}
-      ];
-      hearts.forEach(function(h){ h.collected = false; });
-      var heartScore = 0;
-      var pops = [];
-      var tick = 0;
 
       function doJump() { if (p.onGround && !gameWon) { p.vy = JUMP; p.onGround = false; } }
       function resetP() { p.x=60; p.y=GND-36; p.vx=0; p.vy=0; p.onGround=false; gameDead=false; camX=0; }
@@ -1403,16 +1366,6 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
             }
           }
           if (p.y > H+80) { gameDead=true; deadTick=55; }
-          /* heart collection */
-          for (var hi=0; hi<hearts.length; hi++) {
-            var hh = hearts[hi];
-            if (hh.collected) continue;
-            if (p.x+p.w > hh.x-10 && p.x < hh.x+10 && p.y+p.h > hh.y-10 && p.y < hh.y+10) {
-              hh.collected = true;
-              heartScore++;
-              pops.push({wx: hh.x, wy: hh.y, alpha: 1.0});
-            }
-          }
           if (p.x+p.w > prX && p.x < prX+36 && p.y+p.h > prY) {
             gameWon=true;
             setTimeout(function(){ burst(); show("storyEndScreen"); initStoryEnd(); },1600);
@@ -1422,13 +1375,6 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
         var tCam = p.x - W*0.35;
         camX += (tCam-camX)*0.1;
         camX = Math.max(0, Math.min(camX, WORLD_W-W));
-
-        tick++;
-        /* update pops */
-        for (var pi=pops.length-1; pi>=0; pi--) {
-          pops[pi].wy -= 1.2; pops[pi].alpha -= 0.022;
-          if (pops[pi].alpha <= 0) pops.splice(pi, 1);
-        }
 
         /* ── draw ── */
         var sky=ctx.createLinearGradient(0,0,0,H);
@@ -1463,37 +1409,6 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
           ctx.fillRect(pgx,GND+2,pg.w,42);
           ctx.font="13px serif"; ctx.fillText("🌊",pgx+pg.w/2-8,GND+30);
         }
-
-        /* draw hearts */
-        for (var hi=0; hi<hearts.length; hi++) {
-          var hh=hearts[hi];
-          if (hh.collected) continue;
-          var hsx=hh.x-camX;
-          if (hsx<-20||hsx>W+20) continue;
-          var bob = Math.sin(tick*0.07 + hi*0.8) * 4;
-          drawPickupHeart(ctx, hsx, hh.y + bob - 8, 8);
-        }
-        /* draw pop texts */
-        for (var pi=0; pi<pops.length; pi++) {
-          var pop=pops[pi], psx2=pop.wx-camX;
-          ctx.save();
-          ctx.globalAlpha = pop.alpha;
-          ctx.font = "bold 13px system-ui";
-          ctx.fillStyle = "#ff3b7a";
-          ctx.textAlign = "center";
-          ctx.fillText("+1 ♥", psx2, pop.wy);
-          ctx.restore();
-        }
-
-        /* HUD – heart score */
-        ctx.save();
-        ctx.fillStyle = "rgba(255,255,255,0.78)";
-        ctx.beginPath(); ctx.roundRect(8, 8, 72, 22, 8); ctx.fill();
-        ctx.font = "bold 13px system-ui";
-        ctx.fillStyle = "#ff3b7a";
-        ctx.textAlign = "left";
-        ctx.fillText("♥ " + heartScore + " / 15", 16, 24);
-        ctx.restore();
 
         var prSx=prX-camX;
         if (prSx>-60&&prSx<W+60) {
