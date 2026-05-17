@@ -548,6 +548,48 @@
     }
     .popup-btn:hover { background: var(--pink-hover); }
 
+    /* ── SEN Mİ O MU ── */
+    .smo-card { width: min(520px, 92vw); margin: 0 auto; padding: 32px 24px; }
+    .smo-badge {
+      display: inline-block; background: linear-gradient(135deg,#ff3b7a,#ff9a3c);
+      color:#fff; font-size:11px; font-weight:800; letter-spacing:2px;
+      padding:5px 16px; border-radius:999px; margin-bottom:18px;
+    }
+    .smo-q {
+      font-size: clamp(20px,5vw,30px); font-weight:900;
+      color:#1a1a2e; margin-bottom:28px; line-height:1.3;
+    }
+    .smo-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+    .smo-btn {
+      padding:14px 32px; font-size:16px; font-weight:800;
+      border-radius:999px; border:none; cursor:pointer;
+      transition:transform .12s, box-shadow .12s;
+      box-shadow:0 6px 20px rgba(0,0,0,0.12);
+    }
+    .smo-btn:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,0.16); }
+    .smo-btn-a { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+    .smo-btn-b { background:linear-gradient(135deg,#ff3b7a,#ff6b9d); color:#fff; }
+    .smo-btn-c { background:linear-gradient(135deg,#43e97b,#38f9d7); color:#1a1a2e; }
+    .smo-feedback {
+      display:none; margin-top:20px; padding:18px 20px;
+      border-radius:16px; font-size:15px; font-weight:700; line-height:1.5;
+    }
+    .smo-feedback.correct { background:#d4f5e2; color:#155724; border:2px solid #28a745; }
+    .smo-feedback.wrong   { background:#fde8e8; color:#7a1c1c; border:2px solid #dc3545; animation: smo-shake .4s ease; }
+    @keyframes smo-shake {
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 60%{transform:translateX(8px)}
+    }
+    .smo-next { display:none; margin-top:16px; }
+    .smo-progress { display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+    .smo-dot { width:10px; height:10px; border-radius:50%; background:#e5e7eb; transition:background .3s; }
+    .smo-dot.done { background:var(--pink); }
+    .smo-dot.active { background:#ff9a3c; transform:scale(1.3); }
+    .smo-result { text-align:center; padding:16px 0; }
+    .smo-result-emoji { font-size:64px; margin-bottom:12px; animation:bounce 1s ease infinite; }
+    .smo-result-title { font-size:clamp(20px,5vw,28px); font-weight:900; color:var(--pink); margin-bottom:8px; }
+    .smo-result-sub { font-size:15px; color:#666; line-height:1.6; margin-bottom:24px; }
+    .smo-score { font-size:13px; color:#aaa; margin-bottom:20px; }
+
     /* ── COUNTDOWN OVERLAY ── */
     #countdownOverlay {
       display: none;
@@ -814,6 +856,28 @@
       <div class="mem-pairs" id="memPairs">5 çift kaldı</div>
       <div class="mem-grid" id="memGrid"></div>
       <button class="btn-pink" id="memNext" style="display:none">Maceraya Başla! 🕹️</button>
+    </div>
+  </div>
+
+  <!-- ════ 6b. SEN Mİ O MU ════ -->
+  <div class="screen" id="senMiOmuScreen">
+    <div class="card smo-card">
+      <div class="smo-badge">👫 SEN Mİ O MU?</div>
+      <div class="smo-progress" id="smoDots"></div>
+      <div class="smo-q" id="smoQ"></div>
+      <div class="smo-btns" id="smoBtns"></div>
+      <div class="smo-feedback" id="smoFeedback"></div>
+      <div class="smo-next">
+        <button class="btn-pink" id="smoNext">Sonraki →</button>
+      </div>
+      <!-- Result -->
+      <div class="smo-result" id="smoResult" style="display:none">
+        <div class="smo-result-emoji">💕</div>
+        <div class="smo-result-title">İkiniz de birbirinize layıksınız!</div>
+        <div class="smo-result-sub">Ne kadar farklı ya da benzer olsanız da… sizi siz yapan tam da bu. 🥹</div>
+        <div class="smo-score" id="smoScore"></div>
+        <button class="btn-pink" id="smoFinish">Maceraya Devam! 🕹️</button>
+      </div>
     </div>
   </div>
 
@@ -1290,8 +1354,148 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       document.getElementById("bidikPopup").classList.remove("show");
       document.getElementById("memNext").style.display = "inline-block";
     });
-    document.getElementById("memNext").addEventListener("click", function() { show("gameStoryScreen"); initStory(); });
+    document.getElementById("memNext").addEventListener("click", function() { show("senMiOmuScreen"); initSenMiOmu(); });
     document.getElementById("startGameBtn").addEventListener("click", function() { show("gameScreen"); initGame(); });
+    document.getElementById("smoFinish").addEventListener("click", function() { show("gameStoryScreen"); initStory(); });
+
+    /* ── SEN Mİ O MU ── */
+    function initSenMiOmu() {
+      var qs = [
+        {
+          q: "Daha çok uyur? 😴",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"}],
+          correct: "b",
+          ok:   "YES! 🎉 Barış da böyle düşünüyordu! Sabah alarmı kaç kere çaldı acaba? 😄",
+          fail: "DITTT! 🚨 Barış: 'Sabah 11'de hâlâ uyuyan kim?' dedi 😂"
+        },
+        {
+          q: "Daha kıskanç? 😤",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"}],
+          correct: "a",
+          ok:   "YES! 🎉 Barış itiraf etti... en azından bu konuda dürüst 😅",
+          fail: "DITTT! 🚨 Barış: 'Yok canım, ben hiç kıskanç değilim!' dedi. Ama biz biliyoruz 😏"
+        },
+        {
+          q: "Daha çok yemek yer? 🍕",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"}],
+          correct: "b",
+          ok:   "YES! 🎉 Barış: 'Sevgilim yemek yemeyi sever, bu çok tatlı' dedi 🥰",
+          fail: "DITTT! 🚨 Barış: 'Sevgilim yemek yemeyi sever, bunu bilmez miydim!' dedi 😂🍕"
+        },
+        {
+          q: "Daha inatçı? 😤",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"},{l:"İkimiz de 🤝",v:"c"}],
+          correct: "c",
+          ok:   "YES! 🎉 İki inatçı bir arada — tartışmalar efsane olmalı 😄",
+          fail: "DITTT! 🚨 Diğerinin inatçılığını hafifletici sebep saymak olmaz! 😂"
+        },
+        {
+          q: "Daha komik? 😂",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"}],
+          correct: "a",
+          ok:   "YES! 🎉 Barış zaten bunu herkese söylüyor, iyi ki kabul ettin 😄",
+          fail: "DITTT! 🚨 Barış: 'Yani... ben de birkaç iyi fıkra bilirim' dedi 😄"
+        },
+        {
+          q: "Daha çalışkan? 💪",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"},{l:"İkimiz de 🤝",v:"c"}],
+          correct: "c",
+          ok:   "YES! 🎉 İkiniz de çok çalışkansınız! Harika bir ekip 💪",
+          fail: "DITTT! 🚨 Bu siteyi haftalarca yapan Barış'ı saydın mı? 😂"
+        },
+        {
+          q: "Daha güzel giyinir? 👗",
+          opts: [{l:"Barış",v:"a"},{l:"Ben",v:"b"}],
+          correct: "b",
+          ok:   "YES! 🎉 Barış: 'Milano Fashion Week şampiyonu Polen!' dedi 👑😂",
+          fail: "DITTT! 🚨 Barış: 'Ben mi? Hadi oradan! Milano Fashion Week şampiyonu o!' 👑"
+        }
+      ];
+
+      var idx = 0, score = 0, answered = false;
+
+      var dotsEl     = document.getElementById("smoDots");
+      var qEl        = document.getElementById("smoQ");
+      var btnsEl     = document.getElementById("smoBtns");
+      var fbEl       = document.getElementById("smoFeedback");
+      var nextEl     = document.querySelector(".smo-next");
+      var resultEl   = document.getElementById("smoResult");
+      var scoreEl    = document.getElementById("smoScore");
+
+      resultEl.style.display = "none";
+      document.querySelector(".smo-badge").style.display = "inline-block";
+      dotsEl.style.display = "flex";
+      qEl.style.display = "block";
+      btnsEl.style.display = "flex";
+
+      /* build dots */
+      dotsEl.innerHTML = "";
+      for (var d = 0; d < qs.length; d++) {
+        var dot = document.createElement("div");
+        dot.className = "smo-dot" + (d === 0 ? " active" : "");
+        dot.id = "smoDot" + d;
+        dotsEl.appendChild(dot);
+      }
+
+      function loadQ() {
+        answered = false;
+        fbEl.style.display = "none"; fbEl.className = "smo-feedback";
+        nextEl.style.display = "none";
+        var q = qs[idx];
+        qEl.textContent = q.q;
+        btnsEl.innerHTML = "";
+        var cls = ["smo-btn-a","smo-btn-b","smo-btn-c"];
+        for (var i = 0; i < q.opts.length; i++) {
+          (function(opt, ci) {
+            var btn = document.createElement("button");
+            btn.className = "smo-btn " + cls[ci];
+            btn.textContent = opt.l;
+            btn.addEventListener("click", function() { answer(opt.v); });
+            btnsEl.appendChild(btn);
+          })(q.opts[i], i);
+        }
+      }
+
+      function answer(v) {
+        if (answered) return;
+        answered = true;
+        var q = qs[idx];
+        var correct = v === q.correct;
+        if (correct) score++;
+        /* disable buttons */
+        var allBtns = btnsEl.querySelectorAll(".smo-btn");
+        for (var i = 0; i < allBtns.length; i++) allBtns[i].disabled = true;
+        fbEl.style.display = "block";
+        fbEl.className = "smo-feedback " + (correct ? "correct" : "wrong");
+        fbEl.textContent = correct ? q.ok : q.fail;
+        /* update dot */
+        var dot = document.getElementById("smoDot" + idx);
+        if (dot) { dot.classList.remove("active"); dot.classList.add("done"); }
+        nextEl.style.display = "block";
+      }
+
+      document.getElementById("smoNext").onclick = function() {
+        idx++;
+        if (idx >= qs.length) {
+          /* show result */
+          document.querySelector(".smo-badge").style.display = "none";
+          dotsEl.style.display = "none";
+          qEl.style.display = "none";
+          btnsEl.style.display = "none";
+          fbEl.style.display = "none";
+          nextEl.style.display = "none";
+          resultEl.style.display = "block";
+          scoreEl.textContent = score + " / " + qs.length + " doğru 🎯";
+          try { burst(); } catch(e){}
+        } else {
+          var dot = document.getElementById("smoDot" + idx);
+          if (dot) dot.classList.add("active");
+          loadQ();
+        }
+      };
+
+      loadQ();
+    }
 
     /* ── 6. STORY ── */
     function initStory() {
