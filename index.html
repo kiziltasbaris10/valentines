@@ -903,7 +903,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     });
 
     /* ── 2. LANDING ── */
-    document.getElementById("startBtn").addEventListener("click", function() { startMusic(); show("valentineScreen"); });
+    document.getElementById("startBtn").addEventListener("click", function() { startMusic(); show("quizScreen"); loadQ(0); });
 
     /* ── 3. VALENTINE ── */
     const zone   = document.getElementById("zone");
@@ -928,9 +928,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
     noBtn.addEventListener("click", e => e.preventDefault());
     yesBtn.addEventListener("click", function() {
       burst();
-      curQ = 0;
-      loadQ(0);
-      show("quizScreen");
+      show("letterScreen");
     });
 
     /* ── 4. QUIZ ── */
@@ -1149,7 +1147,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       var se = document.getElementById("storyEndScreen");
       se.classList.remove("active");
       se.style.display = "none";
-      show("letterScreen");
+      show("valentineScreen");
     });
 
     function initStoryEnd() {
