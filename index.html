@@ -505,7 +505,8 @@
       z-index: 20; overflow: hidden;
     }
     #storyEndScreen .story-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: transparent; }
-    .story-inner { text-align: center; padding: 40px 28px; max-width: 500px; position: relative; z-index: 2; }
+    .story-inner { text-align: center; padding: 28px 28px 40px; max-width: 500px; position: relative; z-index: 2; max-height: 88vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .story-inner::-webkit-scrollbar { display: none; }
     .story-hearts { font-size: 28px; margin-bottom: 24px; opacity: 0; transition: opacity 1s; letter-spacing: 8px; }
     .story-hearts.vis { opacity: 1; }
     .story-line {
@@ -1187,6 +1188,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       var cont = document.getElementById("storyEndLines");
       var btn  = document.getElementById("openLetterBtn");
       var hrt  = document.getElementById("storyEndHearts");
+      var inner = document.querySelector("#storyEndScreen .story-inner");
       cont.innerHTML = ""; btn.style.display = "none"; hrt.classList.remove("vis");
       setTimeout(function(){ hrt.classList.add("vis"); }, 300);
       var els = [];
@@ -1198,8 +1200,15 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       }
       var idx = 0;
       function next() {
-        if (idx >= els.length) { setTimeout(function(){ btn.style.display = "inline-block"; }, 700); return; }
+        if (idx >= els.length) {
+          setTimeout(function(){
+            btn.style.display = "inline-block";
+            inner.scrollTop = inner.scrollHeight;
+          }, 700);
+          return;
+        }
         els[idx].classList.add("vis");
+        inner.scrollTop = inner.scrollHeight;
         var delay = lines[idx].t ? 1900 : 600;
         idx++; setTimeout(next, delay);
       }
