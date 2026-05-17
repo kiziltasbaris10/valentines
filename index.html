@@ -380,6 +380,52 @@
     .final-emojis { font-size: 44px; margin: 8px 0 6px; letter-spacing: 6px; animation: bounce 1.2s ease infinite; }
     .final-sub { font-size: 15px; color: #888; margin-top: 10px; }
 
+    /* ── BULUŞMA GERİ SAYIM ── */
+    .meetup-countdown {
+      margin-top: 36px;
+      padding: 24px 20px;
+      background: linear-gradient(135deg, #fff0f5, #fff5f0);
+      border-radius: 20px;
+      border: 1.5px solid rgba(255,59,122,0.15);
+      text-align: center;
+      animation: fadeInUp .8s ease both;
+      animation-delay: 2s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    .meetup-label {
+      font-size: 13px; color: #bbb; letter-spacing: 2px;
+      text-transform: uppercase; font-family: 'Courier New', monospace;
+      margin-bottom: 10px;
+    }
+    .meetup-intro {
+      font-size: clamp(15px, 3.5vw, 18px);
+      color: #555; margin-bottom: 16px;
+      font-family: Georgia, serif; font-style: italic;
+    }
+    .meetup-digits {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    }
+    .meetup-box {
+      background: #fff; border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 4px 16px rgba(255,59,122,0.1);
+      min-width: 62px;
+    }
+    .meetup-num {
+      font-size: clamp(26px, 6vw, 36px);
+      font-weight: 900; color: var(--pink);
+      line-height: 1; display: block;
+    }
+    .meetup-unit {
+      font-size: 10px; color: #bbb; letter-spacing: 1.5px;
+      text-transform: uppercase; margin-top: 4px; display: block;
+    }
+    .meetup-footer {
+      margin-top: 14px; font-size: 13px; color: #ccc;
+      font-family: Georgia, serif; font-style: italic;
+    }
+
     /* ── PHOTO GALLERY ── */
     .photo-gallery {
       display: flex;
@@ -1052,6 +1098,19 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       <div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:pointer;">
         <img id="lightboxImg" src="" alt="" style="max-width:92vw;max-height:86vh;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,0.6);object-fit:contain;">
         <div style="color:rgba(255,255,255,0.4);font-size:12px;">kapat için tıkla</div>
+      </div>
+
+      <!-- Buluşma geri sayım -->
+      <div class="meetup-countdown">
+        <div class="meetup-label">✈️ 11 Temmuz 2026</div>
+        <div class="meetup-intro">Ve… görüşmemize kalan 🤍</div>
+        <div class="meetup-digits">
+          <div class="meetup-box"><span class="meetup-num" id="cdDays">--</span><span class="meetup-unit">gün</span></div>
+          <div class="meetup-box"><span class="meetup-num" id="cdHours">--</span><span class="meetup-unit">saat</span></div>
+          <div class="meetup-box"><span class="meetup-num" id="cdMins">--</span><span class="meetup-unit">dakika</span></div>
+          <div class="meetup-box"><span class="meetup-num" id="cdSecs">--</span><span class="meetup-unit">saniye</span></div>
+        </div>
+        <div class="meetup-footer">sayıyorum… 🍁</div>
       </div>
 
       <div style="margin-top:28px;">
@@ -2020,6 +2079,32 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       document.getElementById("lightbox").style.display = "none";
     }
     document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeLightbox(); });
+
+    /* ── BULUŞMA GERİ SAYIM ── */
+    (function() {
+      var target = new Date("2026-07-11T00:00:00");
+      function update() {
+        var now  = new Date();
+        var diff = target - now;
+        if (diff <= 0) {
+          document.getElementById("cdDays").textContent  = "0";
+          document.getElementById("cdHours").textContent = "0";
+          document.getElementById("cdMins").textContent  = "0";
+          document.getElementById("cdSecs").textContent  = "0";
+          return;
+        }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000)  / 60000);
+        var s = Math.floor((diff % 60000)    / 1000);
+        document.getElementById("cdDays").textContent  = d;
+        document.getElementById("cdHours").textContent = String(h).padStart(2,"0");
+        document.getElementById("cdMins").textContent  = String(m).padStart(2,"0");
+        document.getElementById("cdSecs").textContent  = String(s).padStart(2,"0");
+      }
+      update();
+      setInterval(update, 1000);
+    })();
 
     /* ── DİLEK FENERİ ── */
     document.getElementById("dilekBtn2").addEventListener("click", function() {
