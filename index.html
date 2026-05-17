@@ -548,6 +548,45 @@
     }
     .popup-btn:hover { background: var(--pink-hover); }
 
+    /* ── BULUT YORUM ── */
+    #cloudBubble {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%);
+      width: min(380px, 88vw);
+      background: #fff;
+      border-radius: 22px;
+      padding: 16px 20px 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      font-family: Georgia, serif; font-style: italic;
+      font-size: clamp(13px, 3.2vw, 15px);
+      color: #333; line-height: 1.65;
+      z-index: 8000;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #cloudBubble::after {
+      content: '';
+      position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+      border: 12px solid transparent;
+      border-top-color: #fff;
+      border-bottom: 0;
+    }
+    #cloudBubble .cloud-name {
+      font-size: 11px; font-style: normal; font-weight: 800;
+      color: var(--pink); letter-spacing: 1px;
+      margin-bottom: 6px; display: block;
+    }
+    @keyframes cloudIn {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(18px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes cloudOut {
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-24px); }
+    }
+    #cloudBubble.show { animation: cloudIn .5s cubic-bezier(.22,1,.36,1) forwards; }
+    #cloudBubble.hide { animation: cloudOut .7s ease-in forwards; }
+
     /* ── SEN Mİ O MU ── */
     .smo-card { width: min(520px, 92vw); margin: 0 auto; padding: 32px 24px; }
     .smo-badge {
@@ -697,6 +736,12 @@
 
 <body>
   <canvas id="confettiCanvas"></canvas>
+
+  <!-- Cloud Bubble -->
+  <div id="cloudBubble">
+    <span class="cloud-name">Barış diyor ki:</span>
+    <span id="cloudText"></span>
+  </div>
 
   <!-- Countdown Overlay -->
   <div id="countdownOverlay" style="display:none;position:fixed;inset:0;background:rgba(5,5,18,0.97);z-index:9500;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
@@ -1117,6 +1162,22 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
       });
     });
 
+    var cloudTimer = null;
+    function showCloud(msg) {
+      var el = document.getElementById("cloudBubble");
+      var tx = document.getElementById("cloudText");
+      if (!el || !tx) return;
+      if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; }
+      el.className = "";
+      tx.textContent = msg;
+      void el.offsetWidth;
+      el.className = "show";
+      cloudTimer = setTimeout(function() {
+        el.className = "hide";
+        cloudTimer = setTimeout(function() { el.className = ""; }, 700);
+      }, 9000);
+    }
+
     function startCountdown(cb) {
       var overlay = document.getElementById("countdownOverlay");
       var numEl   = document.getElementById("cdNum");
@@ -1193,16 +1254,16 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
 
     /* ── 4. QUIZ ── */
     var qs = [
-      { q: "When did Baris first message you?",                              opts: ["November 5","December 31","October 31","September 19"], a: 2 },
-      { q: "When did Baris first send you flowers?",                         opts: ["December 25","November 20","October 30","January 23"],  a: 1 },
-      { q: "What was the first meal you and Baris ate together?",            opts: ["Iskender","Sushi","Doner","Pide"],                       a: 2 },
-      { q: "Where did we first meet?",                                       opts: ["At school","At a cafe","At a bar","On social media"],    a: 0 },
-      { q: "What does Baris love most about Polen?",                         opts: ["Her beauty","Her vision in life","Her intelligence","All of them"], a: 3 },
-      { q: "What was the final score of the air hockey game Polen won in Milan?", opts: ["Polen won 5-1","Polen won 5-2","Polen won 5-3","Polen won 5-4"], a: 3 },
-      { q: "What McDonald's menu did they eat on Valentine's Day?",           opts: ["Big Mac Menu","Whopper Menu","Chicken Burger Menu"],     a: 0 },
-      { q: "Who is the person Baris wishes he had met most in your life?",   opts: ["Emel Mommy","Mert Reis","Pamir","Grandma Fadik"],        a: 3 },
-      { q: "What is Baris's favorite food?",                                 opts: ["Fresh green beans","Manti","Pizza","Lahmacun"],          a: 0 },
-      { q: "Which terminal did Baris wait for Polen at Malpensa Airport?",   opts: ["Terminal 5","Terminal 7","Terminal 9","Terminal 1"],     a: 1 },
+      { q: "When did Baris first message you?",                              opts: ["November 5","December 31","October 31","September 19"], a: 2, cloud: "Vay be… zaman ne kadar çabuk geçiyor, kendini nasıl hissediyorsun Polen?" },
+      { q: "When did Baris first send you flowers?",                         opts: ["December 25","November 20","October 30","January 23"],  a: 1, cloud: "Çiçeği sana gönderirken ne kadar heyecanlanmıştım bir bilsen 😅💐" },
+      { q: "What was the first meal you and Baris ate together?",            opts: ["Iskender","Sushi","Doner","Pide"],                       a: 2, cloud: "7 aylık ilişkimizin en komik 5 anısına girer bu ya 😂" },
+      { q: "Where did we first meet?",                                       opts: ["At school","At a cafe","At a bar","On social media"],    a: 0, cloud: "Yukardakinin ikimiz için bir planı varmış... Biri '5 sene sonra siz sevgili olacaksınız, Barış Kanada'dan İtalya'ya uçacak' deseydi 'hadi lan' derdim 😂" },
+      { q: "What does Baris love most about Polen?",                         opts: ["Her beauty","Her vision in life","Her intelligence","All of them"], a: 3, cloud: "Hastasıyız bu kızınnnnn ❤️" },
+      { q: "What was the final score of the air hockey game Polen won in Milan?", opts: ["Polen won 5-1","Polen won 5-2","Polen won 5-3","Polen won 5-4"], a: 3, cloud: "Rövanşında hiç şansın yok vallaa... First date gibiydi diye seni üzmek istemedim 😂🏒" },
+      { q: "What McDonald's menu did they eat on Valentine's Day?",           opts: ["Big Mac Menu","Whopper Menu","Chicken Burger Menu"],     a: 0, cloud: "İkişer üçer patatesleri gömerken o şaşkın bakışların hâlâ aklımda 😂🍟" },
+      { q: "Who is the person Baris wishes he had met most in your life?",   opts: ["Emel Mommy","Mert Reis","Pamir","Grandma Fadik"],        a: 3, cloud: "Fatma Anneannem is the best vallaaa 🤍" },
+      { q: "What is Baris's favorite food?",                                 opts: ["Fresh green beans","Manti","Pizza","Lahmacun"],          a: 0, cloud: "Ellerinden yemeden ölürsem gözüm açık gider bu dünyadan" },
+      { q: "Which terminal did Baris wait for Polen at Malpensa Airport?",   opts: ["Terminal 5","Terminal 7","Terminal 9","Terminal 1"],     a: 1, cloud: "Beyaz atlı prensin okyanusları aşıp geldi senin için… Sen gelmez oldun..." },
     ];
     var wrongs = ["Hmmm, are you sure?","Not quite! Try again","I don't think so...","Nope! Give it another shot","Think again!"];
     var curQ = 0;
@@ -1245,6 +1306,7 @@ Seni tarif edemeyeceğim kadar çok seviyorum güzelim benim.</div>
         btns[chosen].classList.add("correct");
         fb.style.color = "#28a745"; fb.textContent = "Correct!";
         burst();
+        if (qs[curQ].cloud) showCloud(qs[curQ].cloud);
         qn.style.display = "inline-block";
         qn.textContent = (curQ + 1 < qs.length) ? "Next" : "Oyuna Gec";
       } else {
